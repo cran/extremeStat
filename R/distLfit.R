@@ -110,8 +110,8 @@ if(length(gofProp)>1 | any(gofProp<0) | any(gofProp>1) )
 dat_full <- dat
 dat <- as.numeric( dat[!is.na(dat)]  )
 # truncate (fit values only to upper part of values):
-dat <- dat[dat>=threshold]
-#
+dat <- dat[dat>=threshold] # GPD fits in q_gpd all use x>t, not x>=t
+#                          # but if t=0, I want to use _all_ data
 # possible distributions: ------------------------------------------------------
 dn <- lmomco::dist.list()
 names(dn) <- dn
@@ -123,7 +123,7 @@ if( ! is.null(selection) )
   if(any(seldn))
    {
    curseldn <- selection[seldn]
-   if(!quiet) on.exit(message("Note in distLfit: selection (", pastec(curseldn),
+   if(!quiet) on.exit(message("Note in distLfit: selection (", toString(curseldn),
    ") not available in lmomco::dist.list(), thus removed."), add=TRUE)
    selection <- selection[!seldn]
    }
@@ -133,14 +133,12 @@ if( ! is.null(selection) )
 else
 # remove some to save time and errors, see ?dist.list # gld, gov and tri added
 if(speed) dn <- dn[ ! dn %in%
-   c("aep4","cau","emu","gep","gld","gov","kmu","kur","lmrq","sla","st3","texp","tri", "lap")]
-### lap (Laplace) is taken out only temporarily until bug in cdflap in lmomco 2.2.2 (2016-03-20) is fixed
-#
+   c("aep4","cau","emu","gep","gld","gov","kmu","kur","lmrq","sla","st3","texp","tri")]
 # Check remaining sample size
 if(length(dat) < 5) {if(!ssquiet)on.exit(message("Note in distLfit: sample size (",
                          length(dat), ") is too small to fit parameters (<5)."), add=TRUE)
   error_out <- as.list(dn) # this is very useful for distLquantile
-  names(error_out) <- dn  # since it keeps the columns if a selection is given
+  names(error_out) <- dn  # since it keeps the rows if a selection is given
   error_gof <- matrix(NA, nrow=length(dn), ncol=6)
   colnames(error_gof) <- c("RMSE", "R2", paste0("weight",1:3), "weightc")
   rownames(error_gof) <- dn
@@ -153,7 +151,8 @@ if(length(dat) < 5) {if(!ssquiet)on.exit(message("Note in distLfit: sample size 
 mom <- lmomco::lmoms(dat, nmom=5)
 # estimate parameters for each distribution:    # this takes time!
 if(progbars) message("Parameter estimation from linear moments:")
-parameter <- lapply(dn, function(d) lmomco::lmom2par(mom, type=d) )
+parameter <- lapply(dn, function(d) try(lmomco::lmom2par(mom, type=d), silent=TRUE) )
+# wrapped in try since july 2016 because parkap breaks if TAU4=NA  (lmomco 2.2.4)
 # error catching:
 if( length(parameter) != length(dn))
   {

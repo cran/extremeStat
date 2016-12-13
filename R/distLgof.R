@@ -12,12 +12,16 @@
 #'       span the whole data range. Instead the outside support regions get NAs that
 #'       are then detected by rmse and rsquare. I plan to fix this with WHA's new supdist.
 #' @author Berry Boessenkool, \email{berry-b@@gmx.de}, Sept 2014 + July 2015
-#' @seealso \code{\link{distLgofPlot}}, \code{\link{distLfit}}. More complex estimates of quality of fits:
-#'          \url{http://chjs.soche.cl/papers/vol4n1_2013/ChJS-04-01-04.pdf}
+#' @seealso \code{\link{distLgofPlot}}, \code{\link{distLfit}}. 
+#'     More complex estimates of quality of fits:
+#'     Fard, M.N.P. and Holmquist, B. (2013, Chilean Journal of Statistics): 
+#'     Powerful goodness-of-fit tests for the extreme value distribution.
+#'     http://chjs.mat.utfsm.cl/volumes/04/01/Fard_Holmquist(2013).pdf
 #' @keywords univar hplot distribution
 #' @export
 #' @importFrom lmomco plmomco
 #' @importFrom berryFunctions rmse rsquare
+#' @importFrom utils getFromNamespace
 #' 
 #' @examples
 #' 
@@ -117,12 +121,19 @@
 #' dev.off()
 #' } # end dontrun
 #' 
-#' @param dlf List as returned by \code{\link{distLfit}}, containing the elements \code{dat, datname, parameter, gofProp}
-#' @param gofProp Overrides value in list. Proportion (0:1) of highest values in \code{dat} to compute goodness of fit (dist / ecdf) with. This enables to focus on the dist tail
+#' @param dlf List as returned by \code{\link{distLfit}}, containing the elements
+#'            \code{dat, datname, parameter, gofProp}
+#' @param gofProp Overrides value in list. Proportion (0:1) of highest values in
+#'                \code{dat} to compute goodness of fit (dist / ecdf) with.
+#'                 This enables to focus on the dist tail
 #' @param plot Call \code{\link{distLgofPlot}}? DEFAULT: TRUE
 #' @param progbars Show progress bars for each loop? DEFAULT: TRUE if n > 200
-#' @param ks Include ks.test results in \code{dlf$gof}? Computing is much faster when FALSE. DEFAULT: TRUE
-#' @param weightc Optional: a named vector with custom weights for each distribution. Are internally normalized to sum=1 after removing nonfitted dists. Names must match the parameter names from \code{\link{distLfit}}. DEFAULT: NA
+#' @param ks Include ks.test results in \code{dlf$gof}?
+#'            Computing is much faster when FALSE. DEFAULT: TRUE
+#' @param weightc Optional: a named vector with custom weights for each distribution.
+#'                Are internally normalized to sum=1 after removing nonfitted dists.
+#'                Names must match the parameter names from \code{\link{distLfit}}.
+#'                DEFAULT: NA
 #' @param quiet Suppress notes? DEFAULT: FALSE
 #' @param \dots Further arguments passed to \code{\link{distLgofPlot}}
 #' 
@@ -150,26 +161,30 @@ exclude <- sapply(dlf$parameter, function(x)
   {
   if(is.null(x)) return(TRUE)
   # if("ifail" %in% names(x)) if(x$ifail != 0) return(TRUE) ## restriction too tight
-  if(x$type=="gld") return(TRUE) # lmomco 2.2.2 cdfgld bug
-  if(is.null(lmomco::plmomco(mean(dlf$dat),x))) return(TRUE)  # *)
+  ### if(x$type=="gld") return(TRUE) # lmomco 2.2.2 cdfgld bug
+  if(inherits(x, "try-error")) return(TRUE) # lmomco <=2.2.4: parkap TAU4 NA error
+  cumuprob <- try(lmomco::plmomco(mean(dlf$dat),x), silent=TRUE)
+  if(is.null(cumuprob)||inherits(cumuprob,"try-error")) return(TRUE)  # kappa errors
   any(is.na(x$para))
-  })                    #  *): CDF cannot be computed for kappa in Dresden example
+  })
 if(any(exclude))
   {
   curdnexclude <- dn[exclude]
   if(!quiet) on.exit(message("Note in distLgof: The following distributions were excluded since no parameters were estimated:\n",
-             pastec(curdnexclude)), add=TRUE)
+             toString(curdnexclude)), add=TRUE)
   dn <- dn[!exclude]
   # dlf$parameter <- dlf$parameter[!exclude] # not sure whether this is always good...
 }
 if(length(dn)<1&!quiet) on.exit(message("Note in distLgof: No fitted distributions",
                                " in dlf, thus GOF can't be compared."), add=TRUE) else
-if(length(dn)<2&!quiet) on.exit(message("Note in distLgof: Only ", pastec(dn),
+if(length(dn)<2&!quiet) on.exit(message("Note in distLgof: Only ", toString(dn),
                                 " was fitted, thus GOF can't be compared."), add=TRUE)
 if(ks)
   {
   # Kolmogorov-Smirnov test:
   if(progbars) message("Performing ks.test:")
+  ## library("lmomco") # flagged by R CMD check
+  for(d in dn) assign(paste0("cdf",d), getFromNamespace(paste0("cdf",d), "lmomco"))
   ksA <- lapply(dn, function(d) ks.test(dlf$dat, paste0("cdf",d), dlf$parameter[[d]]) )
   ksP <- sapply(ksA, function(x) x$p.value   )
   ksD <- sapply(ksA, function(x) x$statistic )
@@ -201,8 +216,8 @@ if(!quiet)
 gof <- data.frame(RMSE=RMSE, R2=R2)
 if(all(dim(gof) == 0)) # dim = 0,0 if all distributions are excluded
 {
-gof <- data.frame(matrix(NA, ncol=5, nrow=length(dlf$parameter) ))
-colnames(gof) <- c("RMSE","R2","weight1","weight2","weight3")
+gof <- data.frame(matrix(NA, ncol=6, nrow=length(dlf$parameter) ))
+colnames(gof) <- c("RMSE","R2","weight1","weight2","weight3","weightc")
 rownames(gof) <-  names(dlf$parameter)
 } else
 {
@@ -227,7 +242,7 @@ gof$weight3 <- gof$weight3/sum(gof$weight3)
 gof$weightc <- 0
 if(any(!is.na(weightc)))
   {
-  weightc <- weightc[names(weightc)%in%rownames(gof)]
+  weightc <- weightc[names(weightc) %in% rownames(gof)]
   gof[names(weightc), "weightc"] <- weightc
   }
 gof$weightc <- gof$weightc/sum(gof$weightc)

@@ -141,6 +141,26 @@
 #' title(main="The proportion of the data included\nfor calculating RMSE does matter!")
 #' 
 #' 
+#' # Minima -----------------------------------------------------------------------
+#' 
+#' browseURL("http://nrfa.ceh.ac.uk/data/station/meanflow/39072")
+#' qfile <- system.file("extdata/discharge39072.csv", package="berryFunctions")
+#' Q <- read.table(qfile, skip=19, header=TRUE, sep=",", fill=TRUE)[,1:2]
+#' rm(qfile)
+#' colnames(Q) <- c("date","discharge")
+#' Q$date <- as.Date(Q$date)
+#' plot(Q, type="l")
+#' Qmax <- tapply(Q$discharge, format(Q$date,"%Y"), max)
+#' distLextreme(Qmax, quiet=TRUE)
+#' Qmin <- tapply(Q$discharge, format(Q$date,"%Y"), min)
+#' dle <- distLextreme(-Qmin, quiet=TRUE, RPs=c(2,5,10,20,50,100,200,500))
+#' distLextremePlot(dle, ylim=c(0,-31), yaxs="i", yaxt="n", ylab="Q annual minimum", nbest=14)
+#' axis(2, -(0:3*10), 0:3*10, las=1)
+#' -dle$returnlev[c(1:14,21), ]
+#' # Some distribution functions are an obvious bad choice for this, so I use
+#' # weighted 3: Values weighted by GOF of dist only for the best half.
+#' # For the Thames in Windsor, we will likely always have > 9 m^3/s streamflow
+#' 
 #' 
 #' # compare extremeStat with other packages: ---------------------------------------
 #' library(extRemes)
@@ -190,9 +210,17 @@ StartTime <- Sys.time()
 if(quiet) progbars <- FALSE
 if(any(RPs<1.05) & !quiet) on.exit(message("Note in distLextreme: for RPs=1 rather use min(dat)."), add=TRUE)
 # fit distributions and calculate goodness of fits -----------------------------
-if( is.null(dlf) )  dlf <- do.call(distLfit, owa(list(dat=dat, datname=deparse(substitute(dat)), 
+if( is.null(dlf) )  dlf <- do.call(distLfit, owa(list(dat=dat, 
+      datname=deparse(substitute(dat)), truncate=truncate, 
       plot=FALSE, selection=selection, time=FALSE, progbars=progbars, quiet=quiet), 
       fitargs, "dat", "datname", "selection"))
+# Emptyness check:
+if("error" %in% names(dlf)) 
+  {
+  on.exit(message("Note in distLextreme: There was an error in distLfit, ",
+          "thus I'm not plotting anything: ", dlf$error), add=TRUE)
+  plot <- FALSE
+  }
 # Equality check
 if(!missing(dat) & !is.null("dlf")) if(any(dlf$dat != dat) & !quiet)
   on.exit(message("Note in distLextreme: 'dat' differs from 'dlf$dat'. 'dat' is ignored."), add=TRUE)
