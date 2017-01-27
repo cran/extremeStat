@@ -14,17 +14,19 @@
 #' \code{Renext::\link[Renext]{Renouv}} or \code{Renext::\link[Renext]{fGPD}}\cr\cr
 #'
 #' The \bold{\code{method}} defaults (and other possibilities) are \cr
-#' lmomco: none, only linear moments
+#' lmomco: none, only L-moments \cr
 #' evir: "pwm" (probability-weighted moments), or "ml" (maximum likelihood) \cr
 #' evd: none, only Maximum-likelihood fitting implemented \cr
 #' extRemes: "MLE", or "GMLE", "Bayesian", "Lmoments" \cr
 #' fExtremes: "pwm", or "mle"\cr
 #' ismev: none, only Maximum-likelihood fitting implemented \cr
-#' Renext: "r" for \code{\link[Renext]{Renouv}}, or 'f' (no truncation, all negative values ignored!) for \code{\link[Renext]{fGPD}}\cr\cr
+#' Renext: "r" for \code{\link[Renext]{Renouv}} (since distname.y = "gpd", evd::fpot is used), 
+#'      or 'f' for \code{\link[Renext]{fGPD}} (with minimum POTs added)\cr\cr
 #'
 #' The Quantiles are always given with \code{probs} in regard to the full (uncensored) sample.
 #' If e.g. truncate is 0.90, the distribution function is fitted to the top 10\% of the sample.
-#' The 95th percentile of the full sample is equivalent to the 50\% quantile of the subsample acutally used for fitting.
+#' The 95th percentile of the full sample is equivalent to the 50\% quantile of 
+#'     the subsample acutally used for fitting.
 #' For computation, the probabilities are internally updated with \code{p2=(p-t)/(1-t)}
 #' but labelled with the original \code{p}.
 #' If you truncate 90\% of the sample, you cannot compute the 70th percentile anymore,
@@ -32,11 +34,12 @@
 #' If not exported by the packages, the quantile functions are extracted from their source code (Nov 2016).
 #' 
 #' @return Named vector of quantile estimates for each value of \code{probs},\cr
-#'    or if(returnlist): list with element \code{q_gpd_quant} and info-elements added.
-#'    q_gpd_n_geq is number of values greater than or equal to q_gpd_threshold. gt is only greater than.
+#'    or if(list): list with element \code{q_gpd_quant} and info-elements added.
+#'    q_gpd_n_geq is number of values greater than or equal to q_gpd_threshold. 
+#'    gt is only greater than.
 #' @author Berry Boessenkool, \email{berry-b@@gmx.de}, Feb 2016
-#' @references \url{http://stackoverflow.com/questions/27524131/calculation-of-return-levels-based-on-a-gpd-in-different-r-packages}\cr
-#'             \url{http://stats.stackexchange.com/questions/129438/different-quantiles-of-a-fitted-gpd-in-different-r-packages}
+#' @references \url{http://stackoverflow.com/q/27524131}, 
+#'             \url{http://stats.stackexchange.com/q/129438}
 #' @seealso \code{\link{distLquantile}} which compares results for all packages\cr
 #'          Other related packages (not implemented):\cr
 #'                \url{https://cran.r-project.org/package=gPdtest}\cr
@@ -51,7 +54,7 @@
 #' @importFrom fExtremes gpdFit
 #' @importFrom ismev gpd.fit
 #' @importFrom Renext fGPD Renouv qGPD
-#' @importFrom berryFunctions quantileMean
+#' @importFrom berryFunctions quantileMean tryStack
 #'
 #' @examples
 #' data(annMax)
@@ -74,28 +77,56 @@
 #' q_gpd(annMax, package="ismev")
 #' q_gpd(annMax, package="Renext")
 #' q_gpd(annMax, package="Renext", method="f")
-#' dummy <- try(q_gpd(annMax, package="nonsense"), silent=TRUE) # error
-#' stopifnot(class(dummy)=="try-error")
+#' berryFunctions::is.error(q_gpd(annMax, package="nonsense"), force=TRUE)
+#' 
+#' # compare all at once with
+#' d <- distLquantile(annMax); d
+#' # d <- distLquantile(annMax, speed=FALSE); d # for Bayesian also
 #'
 #' q_gpd(annMax, truncate=0.85, package="evd")          # Note about quantiles
 #' q_gpd(annMax, truncate=0.85, package="evir")
 #' q_gpd(annMax, truncate=0.85, package="evir", quiet=TRUE) # No note
 #' q_gpd(annMax, truncate=0.85, package="evir", undertruncNA=FALSE)
 #'
-#' q_gpd(annMax, truncate=0.85, package="evir", returnlist=TRUE)
-#' str(  q_gpd(annMax, truncate=0.85, probs=0.6, package="evir", returnlist=TRUE) )# NAs
-#' str(  q_gpd(annMax, package="evir",      returnlist=TRUE)   )
-#' str(  q_gpd(annMax, package="evd",       returnlist=TRUE)   )
-#' str(  q_gpd(annMax, package="extRemes",  returnlist=TRUE)   )
-#' str(  q_gpd(annMax, package="fExtremes", returnlist=TRUE)   )
-#' str(  q_gpd(annMax, package="ismev",     returnlist=TRUE)   )
-#' str(  q_gpd(annMax, package="Renext",    returnlist=TRUE)   )
+#' q_gpd(annMax, truncate=0.85, package="evir", list=TRUE)
+#' str(  q_gpd(annMax, truncate=0.85, probs=0.6, package="evir", list=TRUE) )# NAs
+#' str(  q_gpd(annMax, package="evir",      list=TRUE)   )
+#' str(  q_gpd(annMax, package="evd",       list=TRUE)   )
+#' str(  q_gpd(annMax, package="extRemes",  list=TRUE)   )
+#' str(  q_gpd(annMax, package="fExtremes", list=TRUE)   )
+#' str(  q_gpd(annMax, package="ismev",     list=TRUE)   )
+#' str(  q_gpd(annMax, package="Renext",    list=TRUE)   )
 #'
 #' q_gpd(annMax, package="evir", truncate=0.9, method="ml") # NAs (MLE fails often)
-#'
-#'
+#' 
+#' trunc <- seq(0,0.9,len=500)
+#' library("pbapply")
+#' quant <- pbsapply(trunc, function(tr) q_gpd(annMax, pack="evir", method = "pwm", 
+#'                                             truncate=tr, quiet=TRUE))
+#' quant <- pbsapply(trunc, function(tr) q_gpd(annMax, pack="lmomco", truncate=tr, quiet=TRUE))
+#' plot(trunc, quant["99%",], type="l", ylim=c(80,130), las=1)
+#' lines(trunc, quant["90%",])
+#' lines(trunc, quant["80%",])
+#' plot(trunc, quant["RMSE",], type="l", las=1)
+#' 
 #' \dontrun{
 #' ## Not run in checks because simulation takes too long
+#' 
+#' trunc <- seq(0,0.9,len=200)
+#' dlfs <- pblapply(trunc, function(tr) distLfit(annMax, truncate=tr, quiet=TRUE, order=FALSE))
+#' rmses <- sapply(dlfs, function(x) x$gof$RMSE)
+#' plot(trunc, trunc, type="n", ylim=range(rmses,na.rm=TRUE), las=1, ylab="rmse")
+#' cols <- rainbow2(17)[rank(rmses[,1])]
+#' for(i in 1:17) lines(trunc, rmses[i,], col=cols[i])
+#'
+#' dlfs2 <- lapply(0:8/10, function(tr) distLfit(annMax, truncate=tr, quiet=TRUE))
+#' pdf("dummy.pdf")
+#' dummy <- sapply(dlfs2, function(x) 
+#' {plotLfit(x, cdf=TRUE, main=x$truncate, ylim=0:1, xlim=c(20,135), nbest=1)
+#' title(sub=round(x$gof$RMSE[1],4))
+#' })
+#' dev.off()
+#' 
 #' # truncation effect
 #' mytruncs <- seq(0, 0.9, len=150)
 #' oo <- options(show.error.messages=FALSE, warn=-1)
@@ -138,34 +169,34 @@
 #' text(300, 360, "empirical quantile of full sample")
 #' text(300, 340, "GPD parametric estimate", col=4)
 #' text(300, 300, "empirical quantile estimate", col="green3")
-#'
+#' 
 #' } # end of dontrun
 #'
-#' @param x Vector with numeric values. NAs are silently ignored.
-#' @param probs Probabilities of truncated (Peak over treshold) quantile. 
-#'              DEFAULT: c(0.8,0.9,0.99)
-#' @param truncate Truncation percentage (proportion of sample discarded). DEFAULT: 0
+#' @param x         Vector with numeric values. NAs are silently ignored.
+#' @param probs     Probabilities of truncated (Peak over treshold) quantile. 
+#'                  DEFAULT: c(0.8,0.9,0.99)
+#' @param truncate  Truncation percentage (proportion of sample discarded). DEFAULT: 0
 #' @param threshold POT cutoff value. If you want correct percentiles, set this 
 #'                  only via truncate, see Details. 
 #'                  DEFAULT: \code{\link[berryFunctions]{quantileMean}(x, truncate)}
-#' @param package Character string naming package to be used. One of 
-#'                c("lmomco","evir","evd","extRemes","fExtremes","ismev"). 
-#'                DEFAULT: "extRemes"
-#' @param method \code{method} passed to the fitting function, if applicable. 
-#'               Defaults are internally specified (See Details), depending on 
-#'               \code{package}, if left to the DEFAULT: NULL.
-#' @param returnlist Return result from the fitting funtion with the quantiles 
-#'                   added to the list as element \code{quant} and some information 
-#'                   in elements starting with \code{q_gpd_}. DEFAULT: FALSE
+#' @param package   Character string naming package to be used. One of 
+#'                  c("lmomco","evir","evd","extRemes","fExtremes","ismev"). 
+#'                  DEFAULT: "extRemes"
+#' @param method    \code{method} passed to the fitting function, if applicable. 
+#'                  Defaults are internally specified (See Details), depending on 
+#'                  \code{package}, if left to the DEFAULT: NULL.
+#' @param list      Return result from the fitting funtion with the quantiles 
+#'                  added to the list as element \code{quant} and some information 
+#'                  in elements starting with \code{q_gpd_}. DEFAULT: FALSE
 #' @param undertruncNA Return NAs for probs below truncate? Highly recommended 
-#'                    to leave this at the DEFAULT: TRUE
-#' @param quiet Should messages from this function be suppressed? DEFAULT: FALSE
-#' @param ttquiet Should truncation!=threshold messages from this function be 
-#'                suppressed? DEFAULT: quiet
-#' @param efquiet Should warnings in function calls to the external packages be 
-#'                suppressed via \code{\link{options}(warn=-1)}? 
-#'                The usual type of warning is: NAs produced in log(...). DEFAULT: quiet
-#' @param \dots Further arguments passed to the fitting funtion listed in section Details.
+#'                  to leave this at the DEFAULT: TRUE
+#' @param quiet     Should messages from this function be suppressed? DEFAULT: FALSE
+#' @param ttquiet   Should truncation!=threshold messages from this function be 
+#'                  suppressed? DEFAULT: quiet
+#' @param efquiet   Should warnings in function calls to the external packages be 
+#'                  suppressed via \code{\link{options}(warn=-1)}? 
+#'                  The usual type of warning is: NAs produced in log(...). DEFAULT: quiet
+#' @param \dots     Further arguments passed to the fitting function listed in section Details.
 #'
 q_gpd <- function(
 x,
@@ -174,7 +205,7 @@ truncate=0,
 threshold=berryFunctions::quantileMean(x, truncate),
 package="extRemes",
 method=NULL,
-returnlist=FALSE,
+list=FALSE,
 undertruncNA=TRUE,
 quiet=FALSE,
 ttquiet=quiet,
@@ -186,11 +217,12 @@ if(length(package)!=1) stop("package must have length 1, not ", length(package))
 pospack <- c("lmomco", "evir","evd","extRemes","fExtremes","ismev","Renext")
 if(!package %in% pospack) stop("package ('",
      package, "') must be one of:\n", toString(pospack))
-x <- x[!is.na(x)]
+x <- sort(x[!is.na(x)])
+xt <- x[x > threshold]
 if(length(truncate)>1)
   {
   truncate <- truncate[1] #
-  if(!quiet) on.exit(message("Note in q_gpd: only first value of 'truncate' is used."), add=TRUE)
+  if(!quiet) message("Note in q_gpd: only first value of 'truncate' is used.")
   }
 if(truncate>1 | truncate<0) stop("truncate (proportion discarded) must be 0<t<1, not ", truncate)
 #
@@ -209,28 +241,28 @@ if(!missing(threshold))
   if(threshold != normalthr)
     {
     probs2 <- probs
-    if(!ttquiet) on.exit(message("Note in q_gpd: threshold (",threshold,
+    if(!ttquiet) message("Note in q_gpd: threshold (",threshold,
     ") is not equal to threshold computed from truncate (",normalthr,
-    ").\n  Probabilities are not corrected for truncation!"), add=TRUE)
+    ").\n  Probabilities are not corrected for truncation!")
     }
   }
 #
 # prepare failure output + regular output for list:
-failout <- rep(NA, length(probs))
-names(failout) <- paste0(probs*100,"%")
+failout <- rep(NA, length(probs)+1)
+names(failout) <- c(paste0(probs*100,"%"), "RMSE")
 outlist <- list(q_gpd_created=Sys.time(), q_gpd_creator="",
    q_gpd_truncate=truncate, q_gpd_threshold=threshold, q_gpd_n_full=length(x),
    q_gpd_n_geq=sum(x>=threshold), q_gpd_n_gt=sum(x>threshold),
    q_gpd_probs=probs, q_gpd_probs2=probs2,
    q_gpd_package=package, q_gpd_method=method, q_gpd_quant=failout)
-if(returnlist) failout <- c(list(z="not fitted"), outlist)
+if(list) failout <- c(list(z="not fitted"), outlist)
 # check probs for compliance with truncate:
 if(all(probs < truncate) & undertruncNA)
    {
-   if(!quiet) on.exit(message("Note in q_gpd: With undertruncNA=TRUE, 'probs' (",
+   if(!quiet) message("Note in q_gpd: With undertruncNA=TRUE, 'probs' (",
               toString(probs),
               ")\n  must contain values that are larger than 'truncate' (",
-              truncate, "). Returning NAs."), add=TRUE)
+              truncate, "). Returning NAs.")
    return(failout)
    }
 #
@@ -239,18 +271,17 @@ if(all(probs < truncate) & undertruncNA)
 if(efquiet) {oo <- options(warn=-1); on.exit(options(oo), add=TRUE)}
 # function to perform in case of failure. Yields useful error message and returns NAs:
 failfun <- function(z, fitfun) {
-  if(!quiet) on.exit(message(
-     "Note in q_gpd: ",fitfun," failed. Returning NAs. \n  Reason: ", z), add=TRUE)
+  if(!quiet) message("Note in q_gpd: ",fitfun," failed. Returning NAs.\n  Reason: ",z)
   return(failout)
   }
 # actual fitting:
 if(package=="lmomco") # fit lmomco #################
 {                                              # x >= t : equal to rest of extremeStat package 
   outlist$q_gpd_creator <- "lmomco::pargpa"    # x > t  : equal to other functons below
-  lmom <- try(lmomco::lmoms(x[x > threshold]), silent=TRUE)
+  lmom <- tryStack(lmomco::lmoms(x[x > threshold]), silent=TRUE)
   if(inherits(lmom, "try-error")) return(failfun(lmom, "lmomco::lmoms"))
   oop <- options(warn=2)
-  z <- try(lmomco::pargpa(lmom, ...), silent=TRUE)       
+  z <- tryStack(lmomco::pargpa(lmom, ...), silent=TRUE)       
   options(oop)
   if(inherits(z, "try-error")) return(failfun(z, "lmomco::pargpa"))
 } else
@@ -259,33 +290,33 @@ if(package=="evir") # fit evir #################
   outlist$q_gpd_creator <- "evir::gpd"
   if(is.null(method)) method <- "pwm"
   pos <- sum(x > threshold)
-  z <- try(evir::gpd(x, nextremes=pos, method=method, ...), silent=TRUE)
+  z <- tryStack(evir::gpd(x, nextremes=pos, method=method, ...), silent=TRUE)
  if(inherits(z, "try-error")) return(failfun(z, "evir::gpd"))
 } else
 if(package=="evd") # fit evd #################
 {
   outlist$q_gpd_creator <- "evd::fpot"
-  z <- try(evd::fpot(x, threshold=threshold, model="gpd", std.err=FALSE, ...), silent=TRUE)
+  z <- tryStack(evd::fpot(x, threshold=threshold, model="gpd", std.err=FALSE, ...), silent=TRUE)
   if(inherits(z, "try-error")) return(failfun(z, "evd::fpot"))
 } else
 if(package=="extRemes") # fit extRemes #################
 {
   outlist$q_gpd_creator <- "extRemes::fevd"
   if(is.null(method)) method <- "MLE"
-  z <- try(extRemes::fevd(x, method=method, type="GP", threshold=threshold, ...), silent=TRUE)
+  z <- tryStack(extRemes::fevd(x, method=method, type="GP", threshold=threshold, ...), silent=TRUE)
   if(inherits(z, "try-error")) return(failfun(z, "extRemes::fevd"))
 } else
 if(package=="fExtremes") # fit fExtremes #################
 {
   outlist$q_gpd_creator <- "fExtremes::gpdFit"
   if(is.null(method)) method <- "pwm"
-  z <- try(z <- fExtremes::gpdFit(x, type=method, u=threshold, ...), silent=TRUE)
+  z <- tryStack(z <- fExtremes::gpdFit(x, type=method, u=threshold, ...), silent=TRUE)
   if(inherits(z, "try-error")) return(failfun(z, "fExtremes::gpdFit"))
 } else
 if(package=="ismev") # fit ismev #################
 {
   outlist$q_gpd_creator <- "ismev::gpd.fit"
-  z <- try(ismev::gpd.fit(x, threshold=threshold, show=FALSE, ...), silent=TRUE)
+  z <- tryStack(ismev::gpd.fit(x, threshold=threshold, show=FALSE, ...), silent=TRUE)
   if(inherits(z, "try-error")) return(failfun(z, "ismev::gpd.fit"))
 } else
 if(package=="Renext") # fit Renext #################
@@ -294,13 +325,13 @@ if(package=="Renext") # fit Renext #################
   if(method=="f")
   {
   outlist$q_gpd_creator <- "Renext::fGPD"
-  z <- try(Renext::fGPD(x[x>0], ...), silent=TRUE)
+  z <- tryStack(Renext::fGPD(xt, ...), silent=TRUE)
   if(inherits(z, "try-error")) return(failfun(z, "Renext::fGPD"))
   } else
   if(method=="r")
   {
   outlist$q_gpd_creator <- "Renext::Renouv"
-  z <- try(Renext::Renouv(x, threshold=threshold, effDuration=length(x),
+  z <- tryStack(Renext::Renouv(x, threshold=threshold, effDuration=length(x),
                     distname.y="gpd", plot=FALSE, ...), silent=TRUE)
   if(inherits(z, "try-error")) return(failfun(z, "Renext::Renouv"))
   } else
@@ -312,26 +343,39 @@ stop("package ", package, " is not in the options. This is a bug. Please report 
 # quantile computing: ----------------------------------------------------------
 if(package=="lmomco") # quant lmomco #################
 {
-  output <- try(lmomco::quagpa(f=probs2, para=z), silent=TRUE)
+  # quantile estimates:
+  output <- tryStack(lmomco::quagpa(f=probs2, para=z), silent=TRUE)
+  # TCDF:
+  TCDF <- tryStack(lmomco::plmomco(xt,z), silent=TRUE)
   if(inherits(output, "try-error")) return(failfun(output, "lmomco::quagpa"))
-  if(is.null(output)) return(failfun("probably pargpa(lmom)$para returned NAs", "lmomco::quagpa"))
+  if(is.null(output)) return(failfun("probably pargpa(lmom)$para returned NAs", 
+                                     "lmomco::quagpa"))
 } else
 if(package=="evir") # quant evir #################
 {
+  # quantile estimates:
   # computing part from evir::quant, Version: 1.7-3, Date: 2011-07-22
   lambda <- length(x)/z$n.exceed
   a <- lambda * (1 - probs)
   gfunc <- function(a, xihat) (a^(-xihat) - 1)/xihat
   output <- z$threshold + z$par.ests["beta"] * gfunc(a, z$par.ests["xi"])
+  # TCDF:
+  TCDF <- evir::pgpd(xt, xi=z$par.ests["xi"], mu=z$threshold, beta=z$par.ests["beta"])
 } else
 if(package=="evd") # quant evd #################
 {
+  # quantile estimates:
   probs2[probs2==0] <- NA
   probs2[probs2==1] <- NA
-  output <- evd::qgpd(p=probs2, loc=z$threshold , scale=z$param["scale"], shape=z$param["shape"])
+  output <- evd::qgpd(p=probs2, loc=z$threshold, scale=z$param["scale"], 
+                      shape=z$param["shape"])
+  # TCDF:
+  TCDF <- evd::pgpd(xt, loc=z$threshold, scale=z$param["scale"], 
+                      shape=z$param["shape"]) 
 } else
 if(package=="extRemes") # quant extRemes #################
 {
+  # quantile estimates:
   # Get parameters from result:
   if(z$method=="Bayesian")
   {
@@ -349,45 +393,75 @@ if(package=="extRemes") # quant extRemes #################
   }
   probs2[probs2==0] <- NA
   probs2[probs2==1] <- NA
-  output <- extRemes::qevd(p=probs2, scale=scale, shape=shape, threshold=z$threshold, type="GP")
+  output <- tryStack(extRemes::qevd(p=probs2, scale=scale, shape=shape, 
+                               threshold=z$threshold, type="GP"), silent=TRUE)
+  if(inherits(output, "try-error")) return(failfun(output, "extRemes::qevd"))
+  # TCDF:
+  TCDF <- tryStack(extRemes::pevd(xt, scale=scale, shape=shape, 
+                               threshold=z$threshold, type="GP"), silent=TRUE)
+  if(inherits(output, "try-error")) return(failfun(output, "extRemes::pevd"))
 } else
 if(package=="fExtremes") #quant fExtremes #################
 {
-  output <- fExtremes::qgpd(p=probs2, xi=z@fit$par.ests["xi"], mu=z@parameter$u, beta=z@fit$par.ests["beta"])
+  # quantile estimates:
+  output <- fExtremes::qgpd(p=probs2, xi=z@fit$par.ests["xi"], mu=z@parameter$u, 
+                            beta=z@fit$par.ests["beta"])
   output <- as.vector(output)
+  # TCDF:
+  TCDF <- fExtremes::pgpd(xt, xi=z@fit$par.ests["xi"], mu=z@parameter$u, 
+                            beta=z@fit$par.ests["beta"])
+  # slots to list:
   z2 <- lapply(slotNames(z), getElement, object=z)
   names(z2) <- slotNames(z)
   z <- z2
-  outlist$q_gpd_Warning <- "transformed into list from Formal class 'fGPDFIT' [package 'fExtremes'] with 8 slots"
+  outlist$q_gpd_Warning <- paste("transformed into list from Formal class",
+                                 "'fGPDFIT' [package 'fExtremes'] with 8 slots")
 } else
 if(package=="ismev") # quant ismev #################
 {
+  # quantile estimates:
   # from ismev Version 1.41 Date 2016-04-27,    ismev:::gpdq
   ismev_gpdq <- function(a,u,p) u + (a[1] * (p^(-a[2]) - 1))/a[2]
   output <- ismev_gpdq(a=z$mle, u=z$threshold, p=1-probs2)
+  # TCDF:
+  ismev_gpdf <- function(a, u, z) 1 - (1 + (a[2] * (z - u))/a[1])^(-1/a[2])
+  TCDF <- ismev_gpdf(a=z$mle, u=z$threshold, z=xt) 
 } else
 if(package=="Renext") # quant Renext #################
 {
+  # quantile estimates:
   if(method=="f")
-  output <- Renext::qGPD(probs2, scale=z$estimate["scale"], shape=z$estimate["shape"])
+  output <- Renext::qGPD(probs2, loc=threshold, scale=z$estimate["scale"], shape=z$estimate["shape"])
   else if(method=="r")
-  output <- Renext::qGPD(probs2, loc=z$threshold, scale=z$estimate["scale"], shape=z$estimate["shape"])
+  output <- Renext::qGPD(probs2, loc=z$threshold, scale=z$estimate["scale"], 
+                         shape=z$estimate["shape"])
+  # TCDF:
+  if(method=="f")
+  TCDF <- Renext::pGPD(xt, loc=threshold, scale=z$estimate["scale"], shape=z$estimate["shape"])
+  else if(method=="r")
+  TCDF <- Renext::pGPD(xt, loc=z$threshold, scale=z$estimate["scale"], 
+                         shape=z$estimate["shape"])
 } else
 stop("package ", package, "is not in the options. This is a bug. Please report to berry-b@gmx.de.")
 #
 #
+# RMSE goodness of fit ---------------------------------------------------------
+ECDF <- ecdf(x)(xt) # Empirical CDF
+if(truncate!=0) TCDF <- TCDF*(1-truncate) + truncate
+TCDF <- rep(TCDF,len=length(ECDF))
+output <- c(output, rmse(TCDF, ECDF, quiet=TRUE) )
+#
 # output formatting, checks: ---------------------------------------------------
-names(output) <- paste0(probs*100,"%")
+names(output) <- c(paste0(probs*100,"%"), "RMSE")
 # replace probs below truncation value with NA:
 if(undertruncNA & any(probs < truncate) & !quiet)
-  on.exit(message("Note in q_gpd: quantiles for probs (",
-     toString(probs[probs<=truncate]),
-     ") below truncate (",truncate,") replaced with NAs."), add=TRUE)
-if(undertruncNA) output[probs < truncate] <- NA
+  message("Note in q_gpd: quantiles for probs (",toString(probs[probs<truncate]),
+          ") below truncate (",truncate,") replaced with NAs.")
+if(undertruncNA) output[c(probs < truncate,FALSE)] <- NA
 # Output result:
 outlist$q_gpd_method <- method
 outlist$q_gpd_quant <- output
-if(returnlist) output <- c(z, outlist)
+if(list) output <- c(z, outlist)
 output
 }
 

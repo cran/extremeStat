@@ -2,64 +2,54 @@
 % Please edit documentation in R/distLfit.R
 \name{distLfit}
 \alias{distLfit}
-\title{Fit distributions via linear moments}
+\title{Fit distributions via L-moments}
 \usage{
-distLfit(dat, datname, speed = TRUE, ks = FALSE, selection = NULL,
-  gofProp = 1, weightc = NA, truncate = 0,
-  threshold = berryFunctions::quantileMean(dat, truncate), gofComp = FALSE,
-  progbars = length(dat) > 200, time = TRUE, plot = TRUE, cdf = FALSE,
-  legargs = NULL, histargs = NULL, quiet = FALSE, ssquiet = quiet, ...)
+distLfit(dat, datname = deparse(substitute(dat)), selection = NULL,
+  speed = TRUE, ks = FALSE, truncate = 0,
+  threshold = berryFunctions::quantileMean(dat, truncate),
+  progbars = length(dat) > 200, time = TRUE, quiet = FALSE,
+  ssquiet = quiet, ...)
 }
 \arguments{
 \item{dat}{Vector with values}
 
-\item{datname}{Character string for main, xlab etc. DEFAULT: internal \code{substitute(dat)}}
+\item{datname}{Character string for main, xlab etc. 
+DEFAULT: \code{deparse(substitute(dat))}}
 
-\item{speed}{If TRUE, several distributions are omitted, for the reasons shown in \code{lmomco::\link[lmomco]{dist.list}()}. DEFAULT: TRUE}
+\item{selection}{Selection of distributions. Character vector with types 
+as in \code{\link[lmomco]{lmom2par}}. Overrides speed. DEFAULT: NULL}
 
-\item{ks}{Include ks.test results in \code{dlf$gof}? Computing is much faster when FALSE. DEFAULT: FALSE}
+\item{speed}{If TRUE, several distributions are omitted, for the reasons 
+shown in \code{lmomco::\link[lmomco]{dist.list}()}. DEFAULT: TRUE}
 
-\item{selection}{Selection of distributions. Character vector with types as in \code{\link[lmomco]{lmom2par}}. Overrides speed. DEFAULT: NULL}
+\item{ks}{Include ks.test results and CDF R^2 in \code{dlf$gof}?
+Computing is much faster when FALSE. DEFAULT: FALSE}
 
-\item{gofProp}{Upper proportion (0:1) of \code{dat} to compute goodness of fit (dist / ecdf) with. This enables to focus on the dist tail. DEFAULT: 1}
+\item{truncate}{Number between 0 and 1. POT Censored \code{\link{distLquantile}}: 
+fit to highest values only (truncate lower proportion of x). 
+Probabilities are adjusted accordingly. DEFAULT: 0}
 
-\item{weightc}{Named custom weights for each distribution, see \code{\link{distLgof}}. DEFAULT: NA}
-
-\item{truncate}{Number between 0 and 1. POT Censored \code{\link{distLquantile}}: fit to highest values only (truncate lower proportion of x). Probabilities are adjusted accordingly. DEFAULT: 0}
-
-\item{threshold}{POT cutoff value. If you want correct percentiles, set this only via truncate, see Details of \code{\link{q_gpd}}. DEFAULT: \code{\link[berryFunctions]{quantileMean}(x, truncate)}}
-
-\item{gofComp}{If TRUE, plots a comparison of the ranks of different GOF-methods and sets plot to FALSE. DEFAULT: FALSE}
+\item{threshold}{POT cutoff value. If you want correct percentiles, 
+set this only via truncate, see Details of \code{\link{q_gpd}}. 
+DEFAULT: \code{\link[berryFunctions]{quantileMean}(x, truncate)}}
 
 \item{progbars}{Show progress bars for each loop? DEFAULT: TRUE if n > 200}
 
 \item{time}{\code{\link{message}} execution time? DEFAULT: TRUE}
 
-\item{plot}{Should a histogram with densities be plotted? DEFAULT: TRUE}
-
-\item{cdf}{If TRUE, plot cumulated DF instead of probability density. DEFAULT: FALSE}
-
-\item{legargs}{List of arguments passed to \code{\link{legend}} except for legend and col. DEFAULT: NULL}
-
-\item{histargs}{List of arguments passed to \code{\link{hist}} except for x, breaks, col, xlim, freq. DEFAULT: NULL}
-
 \item{quiet}{Suppress notes? DEFAULT: FALSE}
 
 \item{ssquiet}{Suppress sample size notes? DEFAULT: quiet}
 
-\item{\dots}{Further arguments passed to \code{\link{distLplot}} if they are accepted there, else passed to \code{\link{lines}}, like lty, type, pch, ...}
+\item{\dots}{Further arguments passed to \code{\link{distLweights}} 
+like weightc, order=FALSE}
 }
 \value{
-List as explained in \code{\link{extremeStat}}.
+invisible dlf object, see \code{\link{printL}}.
 }
 \description{
-Fit several distributions via linear moments, plot histogram and
-distribution densities \emph{or} ecdf with cumulated probability.
-Also returns goodness of fit values.
-This is the main fitting function calling   distLgof   and   distLgofPlot or distLplot
-}
-\details{
-Fits parameters via \code{\link[lmomco]{lmom2par}} in the package \code{lmomco}
+Fit several distributions via L-moments with \code{lmomco::\link[lmomco]{lmom2par}}
+and compute goodness of fit measures.
 }
 \examples{
 
@@ -67,48 +57,76 @@ data(annMax)
 # basic usage on real data (annual discharge maxima in Austria)
 dlf <- distLfit(annMax)
 str(dlf, max.lev=2)
-distLprint(dlf)
+printL(dlf)
+plotLfit(dlf)
 
-# arguments that can be passed:
-distLfit(annMax, lty=2, col=3, legargs=list(lwd=3), main="booh!")
+# arguments that can be passed to plotting function:
+plotLfit(dlf, lty=2, col=3, nbest=17, legargs=list(lwd=3), main="booh!")
 set.seed(42)
-dlf_b <- distLfit(rbeta(100, 5, 2), nbest=10, legargs=c(x="left"))
-distLplot(dlf_b, selection=c("gpa", "glo", "gev", "wak"))
-distLplot(dlf_b, selection=c("gpa", "glo", "gev", "wak"), order=TRUE)
-distLplot(dlf_b, coldist=c("orange",3:6), lty=1:3) # lty is recycled
-distLplot(dlf_b, cdf=TRUE)
-distLplot(dlf_b, cdf=TRUE, histargs=list(do.points=FALSE), sel="nor")
+dlf_b <- distLfit(rbeta(100, 5, 2))
+plotLfit(dlf_b, nbest=10, legargs=c(x="left"))
+plotLfit(dlf_b, selection=c("gpa", "glo", "gev", "wak"))
+plotLfit(dlf_b, selection=c("gpa", "glo", "gev", "wak"), order=TRUE)
+plotLfit(dlf_b, distcols=c("orange",3:6), lty=1:3) # lty is recycled
+plotLfit(dlf_b, cdf=TRUE)
+plotLfit(dlf_b, cdf=TRUE, histargs=list(do.points=FALSE), sel="nor")
 
-
-# Goodness of Fit is computed by RMSE, see first example of ?distLgof
 
 # logarithmic axes:
 set.seed(1)
-y <- 10^rnorm(100, mean=2, sd=0.3) # if you use 1e4, distLgof will be much slower
+y <- 10^rnorm(300, mean=2, sd=0.3) # if you use 1e4, distLfit will be much slower
 hist(y, breaks=20)
 berryFunctions::logHist(y, col=8)
-dlf <- distLfit(log10(y), breaks=50)
-distLplot(dlf, breaks=50, log=TRUE)
+dlf <- distLfit(log10(y))
+plotLfit(dlf, breaks=50)
+plotLfit(dlf, breaks=50, log=TRUE)
 
-\dontrun{
-# this takes a while, as it tries to fit all 30 distributions:
-d_all <- distLfit(annMax, gofProp=1, speed=FALSE, plot=FALSE) # 35 sec
-distLprint(d_all)
-distLplot(d_all, nbest=22, coldist=grey(1:22/29), xlim=c(20,140))
-distLplot(d_all, nbest=22, histargs=list(ylim=c(0,0.04)), xlim=c(20,140))
+
+# Goodness of fit: how well do the distributions fit the original data?
+# measured by RMSE of cumulated distribution function and ?ecdf
+# RMSE: root of average of ( errors squared )  ,   errors = line distances
+dlf <- distLfit(annMax, ks=TRUE)
+plotLfit(dlf, cdf=TRUE, sel=c("wak", "revgum"))
+x <- sort(annMax)
+segments(x0=x, y0=lmomco::plmomco(x, dlf$parameter$revgum), y1=ecdf(annMax)(x), col=2)
+segments(x0=x, y0=lmomco::plmomco(x, dlf$parameter$wak), y1=ecdf(annMax)(x), col=4, lwd=2)
+# weights by three different weighting schemes, see distLweights:
+plotLweights(dlf)
+plotLfit(distLfit(annMax              ), cdf=TRUE, nbest=17)$gof
+plotLfit(distLfit(annMax, truncate=0.7), cdf=TRUE, nbest=17)$gof
+pairs(dlf$gof[,-(2:5)]) # measures of goodness of fit are correlated quite well here.
+dlf$gof
+
+# Kolmogorov-Smirnov Tests for normal distribution return slightly different values:
+library(lmomco)
+ks.test(annMax, "pnorm", mean(annMax), sd(annMax) )$p.value
+ks.test(annMax, "cdfnor", parnor(lmoms(annMax)))$p.value
+
+
+# Fit all available distributions (30):
+\dontrun{# this takes a while...
+d_all <- distLfit(annMax, speed=FALSE, progbars=TRUE) # 20 sec
+printL(d_all)
+plotLfit(d_all, nbest=30, distcols=grey(1:22/29), xlim=c(20,140))
+plotLfit(d_all, nbest=30, ylim=c(0,0.04), xlim=c(20,140))
+plotLweights(d_all)
 d_all$gof
 }
 
 }
 \author{
-Berry Boessenkool, \email{berry-b@gmx.de}, Sept 2014 + July 2015
+Berry Boessenkool, \email{berry-b@gmx.de}, Sept 2014, July 2015, Dec 2016
 }
 \seealso{
-\code{\link{distLgof}}, \code{\link{distLplot}}.
-         \code{\link[extRemes]{fevd}} in the package \code{extRemes},
-         \code{\link[MASS]{fitdistr}} in the package \code{MASS}.
+\code{\link{plotLfit}}, \code{\link{distLweights}}, \code{\link{plotLweights}}, 
+    \code{extRemes::\link[extRemes]{fevd}}, \code{MASS::\link[MASS]{fitdistr}}.\cr
+    More complex estimates of quality of fits:
+    Fard, M.N.P. and Holmquist, B. (2013, Chilean Journal of Statistics): 
+    Powerful goodness-of-fit tests for the extreme value distribution.
+    http://chjs.mat.utfsm.cl/volumes/04/01/Fard_Holmquist(2013).pdf
 }
 \keyword{distribution}
 \keyword{dplot}
 \keyword{hplot}
+\keyword{univar}
 

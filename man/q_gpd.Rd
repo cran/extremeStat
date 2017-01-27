@@ -6,7 +6,7 @@
 \usage{
 q_gpd(x, probs = c(0.8, 0.9, 0.99), truncate = 0,
   threshold = berryFunctions::quantileMean(x, truncate),
-  package = "extRemes", method = NULL, returnlist = FALSE,
+  package = "extRemes", method = NULL, list = FALSE,
   undertruncNA = TRUE, quiet = FALSE, ttquiet = quiet, efquiet = quiet,
   ...)
 }
@@ -30,7 +30,7 @@ DEFAULT: "extRemes"}
 Defaults are internally specified (See Details), depending on 
 \code{package}, if left to the DEFAULT: NULL.}
 
-\item{returnlist}{Return result from the fitting funtion with the quantiles 
+\item{list}{Return result from the fitting funtion with the quantiles 
 added to the list as element \code{quant} and some information 
 in elements starting with \code{q_gpd_}. DEFAULT: FALSE}
 
@@ -46,12 +46,13 @@ suppressed? DEFAULT: quiet}
 suppressed via \code{\link{options}(warn=-1)}? 
 The usual type of warning is: NAs produced in log(...). DEFAULT: quiet}
 
-\item{\dots}{Further arguments passed to the fitting funtion listed in section Details.}
+\item{\dots}{Further arguments passed to the fitting function listed in section Details.}
 }
 \value{
 Named vector of quantile estimates for each value of \code{probs},\cr
-   or if(returnlist): list with element \code{q_gpd_quant} and info-elements added.
-   q_gpd_n_geq is number of values greater than or equal to q_gpd_threshold. gt is only greater than.
+   or if(list): list with element \code{q_gpd_quant} and info-elements added.
+   q_gpd_n_geq is number of values greater than or equal to q_gpd_threshold. 
+   gt is only greater than.
 }
 \description{
 Compute quantile of General Pareto Distribution fitted to sample by peak over treshold (POT) method
@@ -69,17 +70,19 @@ Depending on the value of "package", this fits the GPD using \cr
 \code{Renext::\link[Renext]{Renouv}} or \code{Renext::\link[Renext]{fGPD}}\cr\cr
 
 The \bold{\code{method}} defaults (and other possibilities) are \cr
-lmomco: none, only linear moments
+lmomco: none, only L-moments \cr
 evir: "pwm" (probability-weighted moments), or "ml" (maximum likelihood) \cr
 evd: none, only Maximum-likelihood fitting implemented \cr
 extRemes: "MLE", or "GMLE", "Bayesian", "Lmoments" \cr
 fExtremes: "pwm", or "mle"\cr
 ismev: none, only Maximum-likelihood fitting implemented \cr
-Renext: "r" for \code{\link[Renext]{Renouv}}, or 'f' (no truncation, all negative values ignored!) for \code{\link[Renext]{fGPD}}\cr\cr
+Renext: "r" for \code{\link[Renext]{Renouv}} (since distname.y = "gpd", evd::fpot is used), 
+     or 'f' for \code{\link[Renext]{fGPD}} (with minimum POTs added)\cr\cr
 
 The Quantiles are always given with \code{probs} in regard to the full (uncensored) sample.
 If e.g. truncate is 0.90, the distribution function is fitted to the top 10\% of the sample.
-The 95th percentile of the full sample is equivalent to the 50\% quantile of the subsample acutally used for fitting.
+The 95th percentile of the full sample is equivalent to the 50\% quantile of 
+    the subsample acutally used for fitting.
 For computation, the probabilities are internally updated with \code{p2=(p-t)/(1-t)}
 but labelled with the original \code{p}.
 If you truncate 90\% of the sample, you cannot compute the 70th percentile anymore,
@@ -107,28 +110,56 @@ q_gpd(annMax, package="fExtremes", method= "mle")
 q_gpd(annMax, package="ismev")
 q_gpd(annMax, package="Renext")
 q_gpd(annMax, package="Renext", method="f")
-dummy <- try(q_gpd(annMax, package="nonsense"), silent=TRUE) # error
-stopifnot(class(dummy)=="try-error")
+berryFunctions::is.error(q_gpd(annMax, package="nonsense"), force=TRUE)
+
+# compare all at once with
+d <- distLquantile(annMax); d
+# d <- distLquantile(annMax, speed=FALSE); d # for Bayesian also
 
 q_gpd(annMax, truncate=0.85, package="evd")          # Note about quantiles
 q_gpd(annMax, truncate=0.85, package="evir")
 q_gpd(annMax, truncate=0.85, package="evir", quiet=TRUE) # No note
 q_gpd(annMax, truncate=0.85, package="evir", undertruncNA=FALSE)
 
-q_gpd(annMax, truncate=0.85, package="evir", returnlist=TRUE)
-str(  q_gpd(annMax, truncate=0.85, probs=0.6, package="evir", returnlist=TRUE) )# NAs
-str(  q_gpd(annMax, package="evir",      returnlist=TRUE)   )
-str(  q_gpd(annMax, package="evd",       returnlist=TRUE)   )
-str(  q_gpd(annMax, package="extRemes",  returnlist=TRUE)   )
-str(  q_gpd(annMax, package="fExtremes", returnlist=TRUE)   )
-str(  q_gpd(annMax, package="ismev",     returnlist=TRUE)   )
-str(  q_gpd(annMax, package="Renext",    returnlist=TRUE)   )
+q_gpd(annMax, truncate=0.85, package="evir", list=TRUE)
+str(  q_gpd(annMax, truncate=0.85, probs=0.6, package="evir", list=TRUE) )# NAs
+str(  q_gpd(annMax, package="evir",      list=TRUE)   )
+str(  q_gpd(annMax, package="evd",       list=TRUE)   )
+str(  q_gpd(annMax, package="extRemes",  list=TRUE)   )
+str(  q_gpd(annMax, package="fExtremes", list=TRUE)   )
+str(  q_gpd(annMax, package="ismev",     list=TRUE)   )
+str(  q_gpd(annMax, package="Renext",    list=TRUE)   )
 
 q_gpd(annMax, package="evir", truncate=0.9, method="ml") # NAs (MLE fails often)
 
+trunc <- seq(0,0.9,len=500)
+library("pbapply")
+quant <- pbsapply(trunc, function(tr) q_gpd(annMax, pack="evir", method = "pwm", 
+                                            truncate=tr, quiet=TRUE))
+quant <- pbsapply(trunc, function(tr) q_gpd(annMax, pack="lmomco", truncate=tr, quiet=TRUE))
+plot(trunc, quant["99\%",], type="l", ylim=c(80,130), las=1)
+lines(trunc, quant["90\%",])
+lines(trunc, quant["80\%",])
+plot(trunc, quant["RMSE",], type="l", las=1)
 
 \dontrun{
 ## Not run in checks because simulation takes too long
+
+trunc <- seq(0,0.9,len=200)
+dlfs <- pblapply(trunc, function(tr) distLfit(annMax, truncate=tr, quiet=TRUE, order=FALSE))
+rmses <- sapply(dlfs, function(x) x$gof$RMSE)
+plot(trunc, trunc, type="n", ylim=range(rmses,na.rm=TRUE), las=1, ylab="rmse")
+cols <- rainbow2(17)[rank(rmses[,1])]
+for(i in 1:17) lines(trunc, rmses[i,], col=cols[i])
+
+dlfs2 <- lapply(0:8/10, function(tr) distLfit(annMax, truncate=tr, quiet=TRUE))
+pdf("dummy.pdf")
+dummy <- sapply(dlfs2, function(x) 
+{plotLfit(x, cdf=TRUE, main=x$truncate, ylim=0:1, xlim=c(20,135), nbest=1)
+title(sub=round(x$gof$RMSE[1],4))
+})
+dev.off()
+
 # truncation effect
 mytruncs <- seq(0, 0.9, len=150)
 oo <- options(show.error.messages=FALSE, warn=-1)
@@ -179,8 +210,8 @@ text(300, 300, "empirical quantile estimate", col="green3")
 Berry Boessenkool, \email{berry-b@gmx.de}, Feb 2016
 }
 \references{
-\url{http://stackoverflow.com/questions/27524131/calculation-of-return-levels-based-on-a-gpd-in-different-r-packages}\cr
-            \url{http://stats.stackexchange.com/questions/129438/different-quantiles-of-a-fitted-gpd-in-different-r-packages}
+\url{http://stackoverflow.com/q/27524131}, 
+            \url{http://stats.stackexchange.com/q/129438}
 }
 \seealso{
 \code{\link{distLquantile}} which compares results for all packages\cr

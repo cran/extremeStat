@@ -6,14 +6,15 @@
 \usage{
 distLquantile(x = NULL, probs = c(0.8, 0.9, 0.99), truncate = 0,
   threshold = berryFunctions::quantileMean(dlf$dat_full, truncate),
-  selection = NULL, dlf = NULL, order = TRUE, returnlist = FALSE,
-  empirical = TRUE, weighted = empirical, gpd = empirical,
-  addinfo = FALSE, speed = TRUE, plot = FALSE, plotargs = NULL,
-  quiet = FALSE, ssquiet = quiet, ttquiet = quiet, ...)
+  sanerange = NA, sanevals = NA, selection = NULL, order = TRUE,
+  dlf = NULL, list = FALSE, empirical = TRUE, weighted = empirical,
+  gpd = empirical, speed = TRUE, quiet = FALSE, ssquiet = quiet,
+  ttquiet = quiet, gpquiet = missing(quiet) | quiet, ...)
 }
 \arguments{
 \item{x}{Sample for which parametrical quantiles are to be calculated. 
-If it is NULL (the default), \code{dat} from \code{dlf} is used. DEFAULT: NULL}
+If it is NULL (the default), \code{dat} from \code{dlf} is used. 
+DEFAULT: NULL}
 
 \item{probs}{Numeric vector of probabilities with values in [0,1]. DEFAULT: c(0.8,0.9,0.99)}
 
@@ -25,18 +26,28 @@ Probabilities are adjusted accordingly. DEFAULT: 0}
 set this only via truncate, see Details of \code{\link{q_gpd}}. 
 DEFAULT: \code{\link[berryFunctions]{quantileMean}(x, truncate)}}
 
-\item{selection}{Distribution type, eg. "gev" or "wak", see \code{\link[lmomco]{dist.list} in lmomco}. 
+\item{sanerange}{Range outside of which results should be changed to \code{sanevals}.
+This can capture numerical errors in small samples
+(notably GPD_MLE_extRemes). If NA, this is ignored. 
+Attention: the RMSE column is also checked and changed. 
+DEFAULT: NA}
+
+\item{sanevals}{Values to be used below [1] and above [2] \code{sanerange}. 
+DEFAULT: NA}
+
+\item{selection}{Distribution type, eg. "gev" or "wak", see 
+\code{lmomco::\link[lmomco]{dist.list}}. 
 Can be a vector. If NULL (the default), all types present in 
-dlf$parameter are used. DEFAULT: NULL}
+dlf$distnames are used. DEFAULT: NULL}
+
+\item{order}{Logical: sort by RMSE, even if selection is given? 
+See \code{\link{distLweights}}. DEFAULT: TRUE}
 
 \item{dlf}{dlf object described in \code{\link{extremeStat}}. Use this to save 
-computing time for large datasets where you already have dlf. DEFAULT: NULL}
+computing time for large datasets where you already have dlf. 
+DEFAULT: NULL}
 
-\item{order}{Sort results by GOF? If TRUE (the default) and length(selection)>1, 
-the output is ordered by dlf$gof, else by order of appearance in 
-selection (or dlf$parameter). DEFAULT: TRUE}
-
-\item{returnlist}{Return full \code{dlf}list with output attached as element \code{quant}? 
+\item{list}{Return full \code{dlf}list with output attached as element \code{quant}? 
 If FALSE (the default), just the matrix with quantile estimates 
 is returned. DEFAULT: FALSE}
 
@@ -47,36 +58,32 @@ and vertical lines? DEFAULT: TRUE}
 DEFAULT: empirical, so additional options can all be excluded with emp=F.}
 
 \item{gpd}{Include GPD quantile estimation via \code{\link{q_gpd}}? 
-Note that the 'GPD_LMO_lmomco' result differs slightly from 'gpa' if
-truncate=0. This comes from using x>threshold ('GPD_*') or
+Note that the 'GPD_LMO_lmomco' result differs slightly from 'gpa', 
+especially if truncate=0. This comes from using 
+x>threshold (all 'GPD_*' distributions) or
 x>=threshold ('gpa' and all other distributions in extremeStat). 
 DEFAULT: empirical}
 
-\item{addinfo}{Should information about sample size and threshold be 
-\code{\link{rbind}ed} to the output? DEFAULT: FALSE}
-
 \item{speed}{Compute \code{\link{q_gpd}} only for fast methods? 
-Don't accidentally set this to \code{FALSE} in simulations or 
-with large datasets! DEFAULT: TRUE}
+Currently, only the Bayesian method is excluded. DEFAULT: TRUE}
 
-\item{plot}{Should \code{\link{distLplot}} be called? DEFAULT: FALSE}
-
-\item{plotargs}{List of arguments to be passed to \code{\link{distLplot}} 
-like qlines, qheights, qrow, qlinargs, nbest, cdf, ...}
-
-\item{quiet}{Suppress notes? DEFAULT: FALSE}
+\item{quiet}{Suppress notes? If it is actually set to FALSE (not missing), 
+gpquiet is set to FALSE to print all the warnings including stacks.
+DEFAULT: FALSE}
 
 \item{ssquiet}{Suppress sample size notes? DEFAULT: quiet}
 
-\item{ttquiet}{Suppress truncation!=threshold note? Note that \code{\link{q_gpd}} 
-is called with ttquiet=TRUE. DEFAULT: quiet}
+\item{ttquiet}{Suppress truncation!=threshold note? DEFAULT: quiet}
 
-\item{\dots}{Arguments passed to \code{\link{distLfit}}
-(and \code{\link{distLplot}} if plot=TRUE).}
+\item{gpquiet}{Suppress warnings in \code{\link{q_gpd}}?
+DEFAULT: TRUE if quiet is not specified, else quiet}
+
+\item{\dots}{Arguments passed to \code{\link{distLfit}} 
+and \code{\link{distLweights}} like weightc, ks=TRUE}
 }
 \value{
-Matrix with distribution quantile values (with NAs for probs below truncate), \cr
-or, if returnlist=TRUE, a \code{dlf} list as described in \code{\link{extremeStat}}.
+if list=FALSE (default): invisible matrix with distribution quantile values .
+        if list=TRUE: invisible dlf object, see \code{\link{printL}}
 }
 \description{
 Parametric quantiles of distributions fitted to a sample.
@@ -96,40 +103,50 @@ NAs are always removed from x in \code{\link{distLfit}}
 
 data(annMax) # Annual Discharge Maxima (streamflow)
 
-distLquantile(annMax, emp=FALSE) # several distribution functions in lmomco
-distLquantile(annMax, truncate=0.8, probs=0.95) # POT (annMax already block maxima)
-distLquantile(annMax, probs=0.95, plot=TRUE, qlinargs=list(lwd=3), nbest=5, breaks=10)
+distLquantile(annMax, emp=FALSE)[,] # several distribution functions in lmomco
+distLquantile(annMax, truncate=0.8, probs=0.95)[,] # POT (annMax already block maxima)
+dlf <- distLquantile(annMax, probs=0.95, list=TRUE)
+plotLquantile(dlf, linargs=list(lwd=3), nbest=5, breaks=10)
+dlf$quant
 # Parametric 95\% quantile estimates range from 92 to 111!
 # But the best fitting distributions all lie aroud 103.
 
 # compare General Pareto Fitting methods
 # Theoretically, the tails of distributions converge to GPD (General Pareto)
 # q_gpd compares several R packages for fitting and quantile estimation:
-dlq <- distLquantile(annMax, weight=FALSE, quiet=TRUE, probs=0.97, returnlist=TRUE)
+dlq <- distLquantile(annMax, weighted=FALSE, quiet=TRUE, probs=0.97, list=TRUE)
 dlq$quant
-distLplot(dlq, qlines=TRUE) # per default best fitting distribution functions
-distLplot(dlq, qlines=TRUE, qrow=c("wak","GPD*"), nbest=14)
+plotLquantile(dlq) # per default best fitting distribution functions
+plotLquantile(dlq, row=c("wak","GPD*"), nbest=14)
 #pdf("dummy.pdf", width=9)
-distLplot(dlq, qlines=TRUE, qrow="GPD*", nbest=13, xlim=c(102,110), 
-          qlinargs=list(lwd=3), qheights=seq(0.02, 0.005, len=14))
+plotLquantile(dlq, row="GPD*", nbest=13, xlim=c(102,110), 
+          linargs=list(lwd=3), heights=seq(0.02, 0.005, len=14))
 #dev.off()
 
 
 \dontrun{
 ## Taken out from CRAN package check because it's slow
 
+# Sanity checks: important for very small samples:
+x1 <- c(2.6, 2.5, 2.9, 3, 5, 2.7, 2.7, 5.7, 2.8, 3.1, 3.6, 2.6, 5.8, 5.6, 5.7, 5.3)
+q1 <- distLquantile(x1, sanerange=c(0,500), sanevals=c(NA,500))
+x2 <- c(6.1, 2.4, 4.1, 2.4, 6, 6.3, 2.9, 6.8, 3.5)
+q2 <- distLquantile(x2, sanerange=c(0,500), sanevals=c(NA,500), quiet=FALSE)
+x3 <- c(4.4, 3, 1.8, 7.3, 2.1, 2.1, 1.8, 1.8)
+q3 <- distLquantile(x3, sanerange=c(0,500), sanevals=c(NA,500))
+
 # weighted distribution quantiles are calculated by different weighting schemes:
-dlf <- distLfit(annMax)
-distLgofPlot(dlf, ranks=FALSE, weights=TRUE)
+plotLweights(dlf)
 
 # If speed is important and parameters are already available, pass them via dlf:
-distLquantile(dlf=dlf, probs=0:5/5, selection=c("wak","gev","kap"), order=FALSE)
-distLquantile(dlf=dlf, truncate=0.3, returnlist=TRUE)$truncate
+distLquantile(dlf=dlf, probs=0:5/5, selection=c("wak","gev","kap"))
+distLquantile(dlf=dlf, truncate=0.3, list=TRUE)$truncate
 
 # censored (truncated, trimmed) quantile, Peak Over Treshold (POT) method:
-qwak <- distLquantile(annMax, sel="wak", prob=0.95, plot=TRUE, ylim=c(0,0.06), emp=FALSE)
-qwak2 <-distLquantile(annMax, sel="wak", prob=0.95, truncate=0.6, plot=TRUE,
-                     addinfo=FALSE, add=TRUE, coldist="blue", empirical=FALSE)
+qwak <- distLquantile(annMax, sel="wak", prob=0.95, emp=FALSE, list=TRUE)
+plotLquantile(qwak, ylim=c(0,0.06) ); qwak$quant
+qwak2 <-distLquantile(annMax, sel="wak", prob=0.95, emp=FALSE, list=TRUE, truncate=0.6)
+plotLquantile(qwak2, add=TRUE, distcols="blue")
                      
 
 # Simulation of truncation effect
@@ -139,16 +156,16 @@ rnum <- rlmomco(n=1e3, para=dlf$parameter$gev)
 myprobs <- c(0.9, 0.95, 0.99, 0.999)
 mytrunc <- seq(0, 0.9, length.out=20)
 trunceffect <- sapply(mytrunc, function(mt) distLquantile(rnum, selection="gev",
-                             probs=myprobs, truncate=mt, plot=FALSE, quiet=TRUE,
-                             progbars=FALSE, empirical=FALSE)["gev",])
+                             probs=myprobs, truncate=mt, quiet=TRUE,
+                             pempirical=FALSE)["gev",])
 # If more values are truncated, the function runs faster
 
 op <- par(mfrow=c(2,1), mar=c(2,4.5,2,0.5), cex.main=1)
-distLquantile(rnum, sel="gev", probs=myprobs, emp=FALSE, ylab="", xlab="", plot=TRUE)
-distLquantile(rnum, sel="gev", probs=myprobs, emp=FALSE, addinfo=FALSE,
-              truncate=0.3, add=TRUE, coldist=4, plot=TRUE)
-legend("right", c("fitted GEV", "fitted with truncate=0.3"), lty=1, col=c(2,4),
-       bg="white")
+dlf1 <- distLquantile(rnum, sel="gev", probs=myprobs, emp=FALSE, list=TRUE)
+dlf2 <- distLquantile(rnum, sel="gev", probs=myprobs, emp=FALSE, list=TRUE, truncate=0.3)
+plotLquantile(dlf1, ylab="", xlab="")
+plotLquantile(dlf2, add=TRUE, distcols=4)
+legend("right", c("fitted GEV", "fitted with truncate=0.3"), lty=1, col=c(2,4), bg="white")
 par(mar=c(3,4.5,3,0.5))
 plot(mytrunc, trunceffect[1,], ylim=range(trunceffect), las=1, type="l",
      main=c("High quantiles of 1000 random numbers from gev distribution",
@@ -191,9 +208,10 @@ Berry Boessenkool, \email{berry-b@gmx.de}, March + July 2015, Feb 2016
 On GPD: \url{http://stats.stackexchange.com/questions/69438}
 }
 \seealso{
-\code{\link{q_gpd}}, \code{\link{distLfit}}, Xian Zhou, Liuquan Sun and Haobo Ren (2000): Quantile estimation for left truncated and right censored data, Statistica Sinica 10
+\code{\link{q_gpd}}, \code{\link{distLfit}}, require("truncdist")
+        Xian Zhou, Liuquan Sun and Haobo Ren (2000): Quantile estimation for 
+        left truncated and right censored data, Statistica Sinica 10
          \url{http://www3.stat.sinica.edu.tw/statistica/oldpdf/A10n411.pdf}\cr
-         require("truncdist")
 }
 \keyword{distribution}
 \keyword{robust}

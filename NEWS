@@ -1,14 +1,48 @@
 
 extremeStat ToDo-list / wishlist / issues
-- distLprint: possibly change to print method for dlf objects with personal class
 - read all of https://www.ine.pt/revstat/pdf/rs120102.pdf and coles (2001)
-- if lmomco parkap is changed, change distLfit:154 and distLgof:154 (or leave it...)
-- distLextreme correct RP for POT approach
+- distLextreme, distLquantile, q_gpd: reduce example section, potentially move some to tests. add Nile, rain, danish
+- split up q_gpd into f_gpd, p/q/d/r_gpd and comp_gpd
 
 
 ---------------------------------------
 extremeStat Package by Berry Boessenkool, berry-b@gmx.de
 Any feedback is welcome, per email or on github.com/brry/extremeStat
+---------------------------------------
+
+
+Version 1.3.0 (2017-01-26)
+Package thoroughly cleaned up and restructured:
+- plot functions renamed to common syntax plotL***
+- distLgof integrated into distLfit, but weight part moved into distLweights
+- q_gpd now computes RMSE as well
+- distLextreme can now use POT approach with argument npy
+- fitting failure checks now more extensive + all concentrated in distLfit
+- failure outputs and messages have been improved
+- computing functions do not plot anymore (for more clarity and reproducibility)
+- more code is now formally tested with testthat
+- gofProp option completely removed (POT support is very good now)
+- order option now available throughout the package
+- more line breaks in source code for better readibility
+- on.exit calls changed to immediate messages
+- distLquantile gains sanity checks
+- weightp dataset included
+- extensive use of berryFunctions::tryStack to trace errors and warnings
+- several arguments removed and some renamed
+- documentation more standardized, vignette expanded
+
+For all changes, see
+https://github.com/brry/extremeStat/compare/master@{2016-12-13}...master@{2017-01-26}#files_bucket
+
+new functions: distLweights, q_weighted, plotLquantile
+removed: distLgof
+renamed: distLprint -> printL, 
+         distLextremePlot -> plotLextreme, 
+         distLgofPlot -> plotLweights, 
+         distLplot -> plotLfit
+
+
+---------------------------------------
 ---------------------------------------
 
 

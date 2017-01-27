@@ -4,44 +4,47 @@
 \alias{distLexBoot}
 \title{Bootstrapping uncertainty intervals for return periods}
 \usage{
-distLexBoot(dlf, nbest = 3, selection = NULL, truncate = 0, n = 100,
-  prop = 0.8, returnall = FALSE, conf.lev = 0.95, RPs = NULL,
-  plot = TRUE, add = FALSE, log = TRUE, progbars = TRUE, ...)
+distLexBoot(dlf, nbest = 3, selection = NULL, n = 100, prop = 0.8,
+  conf.lev = 0.95, RPs = NULL, log = TRUE, progbars = TRUE, ...)
 }
 \arguments{
-\item{dlf}{\code{dlf} object, as returned by \code{\link{distLextreme}}, is passed to \code{\link{distLextremePlot}}.}
+\item{dlf}{\code{dlf} object, as returned by \code{\link{distLextreme}}, 
+is passed to \code{\link{plotLextreme}}.}
 
-\item{nbest}{Number of best fitted distribution functions in dlf for which bootstrapping is to be done. Overriden by \code{selection}. DEFAULT: 3}
+\item{nbest}{Number of best fitted distribution functions in dlf for which 
+bootstrapping is to be done. Overriden by \code{selection}. DEFAULT: 3}
 
-\item{selection}{Character vector with distribution function names to be used. Suggested to keep this low. DEFAULT: NULL}
+\item{selection}{Character vector with distribution function names to be used. 
+Suggested to keep this low. DEFAULT: NULL}
 
-\item{truncate}{Truncation of subsamples, see \code{\link{distLquantile}}. DEFAULT: 0}
-
-\item{n}{Number of subsamples to be processed (computing time increases extraordinarily). DEFAULT: 100}
+\item{n}{Number of subsamples to be processed 
+(computing time increases extraordinarily). DEFAULT: 100}
 
 \item{prop}{Proportion of sample to be used in each run. DEFAULT: 0.8}
 
-\item{returnall}{Return all simulations, instead of the aggregate confidence level? DEFAULT: FALSE}
+\item{conf.lev}{Confidence level (Proportion of subsamples within 'confidence interval'). 
+Quantiles extracted from this value are passed to 
+\code{\link[berryFunctions]{quantileMean}}. DEFAULT: 0.95}
 
-\item{conf.lev}{Confidence level (Proportion of subsamples within 'confidence interval'). Quantiles extracted from this value are passed to \code{\link[berryFunctions]{quantileMean}}. DEFAULT: 0.95}
+\item{RPs}{Return Period vector, by default calculated internally based on 
+value of \code{log}. DEFAULT: NULL}
 
-\item{RPs}{Return Period vector, by default calculated internally based on log. DEFAULT: NULL}
-
-\item{plot}{Plot results via \code{\link{distLextremePlot}}? DEFAULT: TRUE}
-
-\item{add}{Add to existing plot? DEFAULT: FALSE}
-
-\item{log}{Plot on a logarithmic axis. DEFAULT: TRUE}
+\item{log}{RPs suitable for plot on a logarithmic axis? DEFAULT: TRUE}
 
 \item{progbars}{Show progress bar for Monte Carlo simulation? DEFAULT: TRUE}
 
-\item{\dots}{Further arguments passed to \code{\link{distLextremePlot}}}
+\item{\dots}{Further arguments passed to \code{\link{distLquantile}}
+like truncate, quiet=TRUE}
 }
 \value{
-A list with (for each selection) a matrix with confidence intervals for RPs, or if returnall=TRUE, all the simulation results
+invisible dlf object, see \code{\link{printL}}.
+Additional elements are: exBootSelection (names of distributions), 
+exBootRPs (x values for plot)
+exBootSim (all simulation results) and exBootCI (agregated into CI band). 
+The last two are each a list with a matrix (RPs)
 }
 \description{
-Calculates and plots bootstrap uncertainty intervals for \code{\link{distLextremePlot}}.
+Calculates and plots bootstrap uncertainty intervals for \code{\link{plotLextreme}}.
 }
 \details{
 Has not been thoroughly tested yet. Bootstrapping defaults can probably be improved.
@@ -49,15 +52,16 @@ Has not been thoroughly tested yet. Bootstrapping defaults can probably be impro
 \examples{
 
 data(annMax)
-dlf <- distLextreme(annMax, log=TRUE, selection=c("wak","gum","gev","nor"))
-dleB <- distLexBoot(dlf, nbest=4, conf.lev=0.5, n=10) # n low for quick example tests
+dlf <- distLextreme(annMax, selection=c("wak","gum","gev","nor"))
+dlfB <- distLexBoot(dlf, nbest=4, conf.lev=0.5, n=10) # n low for quick example tests
+plotLexBoot(dlfB)
 
 }
 \author{
-Berry Boessenkool, \email{berry-b@gmx.de}, Sept 2015
+Berry Boessenkool, \email{berry-b@gmx.de}, Sept 2015 + Dec 2016
 }
 \seealso{
-\code{\link{distLextreme}}
+\code{\link{plotLexBoot}}, \code{\link{distLextreme}}
 }
 \keyword{bootstrap}
 \keyword{distribution}
