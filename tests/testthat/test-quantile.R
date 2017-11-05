@@ -6,8 +6,8 @@ set.seed(007) # with other random samples, there can be warnings in q_gpd -> Ren
 
 test_that("distLquantile generally runs fine",{
 distLquantile(annMax)
-expect_equal(nrow(distLquantile(annMax[annMax<30])), 38)
-expect_equal(nrow(distLquantile(annMax)), 38)
+expect_equal(nrow(distLquantile(annMax[annMax<30])), 39)
+expect_equal(nrow(distLquantile(annMax)), 39)
 expect_silent(distLquantile(annMax, truncate=0.6, gpd=FALSE, time=FALSE))
 expect_message(distLquantile(annMax, selection="wak", empirical=FALSE, quiet=FALSE), 
   "distLfit execution took")
@@ -19,6 +19,10 @@ expect_message(distLquantile(rexp(4), selection="gpa"),
 d <- distLquantile(annMax, probs=0:4/4)
 })
 
+
+test_that("infinite values are removed",{
+distLextreme(c(-Inf,annMax))
+})
 
 test_that("distLquantile can handle selection input",{
 dlf <- distLquantile(annMax, selection="wak", empirical=FALSE, list=TRUE)
@@ -101,6 +105,7 @@ gam                   103.8951 0.1128
 rice                  104.2135 0.1217
 nor                   104.2161 0.1218
 revgum                104.9992 0.1595
+empirical             109.2000     NA
 quantileMean          105.7259     NA
 weighted1             102.8789     NA
 weighted2             102.7408     NA
@@ -130,7 +135,7 @@ tst <- which(!is.na(aq[23:38,1]))+22
 expect_equal(round(aq[tst,],1), round(aq_expected[tst,],1))
 
 dd <- distLquantile(annMax, selection="gpa", weighted=FALSE, truncate=0.001)
-expect_equal(sum(is.na(dd[1:15,1:3])), 3)
+expect_equal(sum(is.na(dd[1:15,1:3])), 0)
 expect_equal(dd["gpa",1:3], dd["GPD_LMO_lmomco",1:3])
 })
 
@@ -165,7 +170,7 @@ expect_equal(dd["kap","RMSE"], NA_real_)
 # strongly skewed (gno):
 xx4 <- c(2.4,2.7,2.3,2.5,2.2, 62.4 ,3.8,3.1) 
 expect_warning(dd <- distLquantile(xx4), 
-               glob2rx("in pargno(lmom, ...): L-SKEW IS TOO LARGE FOR ROUTINE*"))
+               glob2rx("in pargno(lmom, ...): L-skew is too large*"), ignore.case=TRUE)
 
 # kap should fail:
 xx5 <- c(2.4, 2.5, 2.6, 2.9, 4.2, 4.6, 5.7)
@@ -190,3 +195,4 @@ d7 <- distLquantile(xx7, probs=c(0.8,0.9,0.99,0.9999), list=TRUE)
 plotLfit(d7, xlim=c(0,2), nbest=10); d7$quant[1:10,]              # 4 (good)
 
 })
+

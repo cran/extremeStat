@@ -5,69 +5,78 @@
 \title{distribution quantiles}
 \usage{
 distLquantile(x = NULL, probs = c(0.8, 0.9, 0.99), truncate = 0,
-  threshold = berryFunctions::quantileMean(dlf$dat_full, truncate),
+  threshold = quantileMean(dlf$dat_full[is.finite(dlf$dat_full)], truncate),
   sanerange = NA, sanevals = NA, selection = NULL, order = TRUE,
-  dlf = NULL, list = FALSE, empirical = TRUE, weighted = empirical,
+  dlf = NULL, datname = deparse(substitute(x)), list = FALSE,
+  empirical = TRUE, qemp.type = 8, weighted = empirical,
   gpd = empirical, speed = TRUE, quiet = FALSE, ssquiet = quiet,
   ttquiet = quiet, gpquiet = missing(quiet) | quiet, ...)
 }
 \arguments{
-\item{x}{Sample for which parametrical quantiles are to be calculated. 
-If it is NULL (the default), \code{dat} from \code{dlf} is used. 
+\item{x}{Sample for which parametric quantiles are to be calculated.
+If it is NULL (the default), \code{dat} from \code{dlf} is used.
 DEFAULT: NULL}
 
 \item{probs}{Numeric vector of probabilities with values in [0,1]. DEFAULT: c(0.8,0.9,0.99)}
 
-\item{truncate}{Number between 0 and 1 (proportion of sample discarded). 
-Censored quantile: fit to highest values only (truncate lower proportion of x). 
+\item{truncate}{Number between 0 and 1 (proportion of sample discarded).
+Censored quantile: fit to highest values only (truncate lower proportion of x).
 Probabilities are adjusted accordingly. DEFAULT: 0}
 
-\item{threshold}{POT cutoff value. If you want correct percentiles, 
-set this only via truncate, see Details of \code{\link{q_gpd}}. 
+\item{threshold}{POT cutoff value. If you want correct percentiles,
+set this only via truncate, see Details of \code{\link{q_gpd}}.
 DEFAULT: \code{\link[berryFunctions]{quantileMean}(x, truncate)}}
 
 \item{sanerange}{Range outside of which results should be changed to \code{sanevals}.
 This can capture numerical errors in small samples
-(notably GPD_MLE_extRemes). If NA, this is ignored. 
-Attention: the RMSE column is also checked and changed. 
+(notably GPD_MLE_extRemes). If NA, this is ignored.
+Attention: the RMSE column is also checked and changed.
 DEFAULT: NA}
 
-\item{sanevals}{Values to be used below [1] and above [2] \code{sanerange}. 
+\item{sanevals}{Values to be used below [1] and above [2] \code{sanerange}.
 DEFAULT: NA}
 
-\item{selection}{Distribution type, eg. "gev" or "wak", see 
-\code{lmomco::\link[lmomco]{dist.list}}. 
-Can be a vector. If NULL (the default), all types present in 
+\item{selection}{Distribution type, eg. "gev" or "wak", see
+\code{lmomco::\link[lmomco]{dist.list}}.
+Can be a vector. If NULL (the default), all types present in
 dlf$distnames are used. DEFAULT: NULL}
 
-\item{order}{Logical: sort by RMSE, even if selection is given? 
+\item{order}{Logical: sort by RMSE, even if selection is given?
 See \code{\link{distLweights}}. DEFAULT: TRUE}
 
-\item{dlf}{dlf object described in \code{\link{extremeStat}}. Use this to save 
-computing time for large datasets where you already have dlf. 
+\item{dlf}{dlf object described in \code{\link{extremeStat}}. Use this to save
+computing time for large datasets where you already have dlf.
 DEFAULT: NULL}
 
-\item{list}{Return full \code{dlf}list with output attached as element \code{quant}? 
-If FALSE (the default), just the matrix with quantile estimates 
+\item{datname}{Character string: data name, important if list=TRUE.
+DEFAULT: deparse(substitute(x))}
+
+\item{list}{Return full \code{dlf}list with output attached as element \code{quant}?
+If FALSE (the default), just the matrix with quantile estimates
 is returned. DEFAULT: FALSE}
 
-\item{empirical}{Add empirical \code{\link{quantileMean}} in the output matrix 
-and vertical lines? DEFAULT: TRUE}
+\item{empirical}{Add rows "empirical" and "quantileMean" in the output matrix?
+Uses \code{\link{quantile}} with \code{qemp.type} (ignoring truncation)
+and \code{\link{quantileMean}}. DEFAULT: TRUE}
+
+\item{qemp.type}{Method passed to \code{\link{quantile}} for row "empirical".
+Only used if \code{empirical=TRUE}.
+DEFAULT: 8 (NOT the \code{stats::quantile} default)}
 
 \item{weighted}{Include weighted averages across distribution functions to the output?
 DEFAULT: empirical, so additional options can all be excluded with emp=F.}
 
-\item{gpd}{Include GPD quantile estimation via \code{\link{q_gpd}}? 
-Note that the 'GPD_LMO_lmomco' result differs slightly from 'gpa', 
-especially if truncate=0. This comes from using 
+\item{gpd}{Include GPD quantile estimation via \code{\link{q_gpd}}?
+Note that the 'GPD_LMO_lmomco' result differs slightly from 'gpa',
+especially if truncate=0. This comes from using
 x>threshold (all 'GPD_*' distributions) or
-x>=threshold ('gpa' and all other distributions in extremeStat). 
+x>=threshold ('gpa' and all other distributions in extremeStat).
 DEFAULT: empirical}
 
-\item{speed}{Compute \code{\link{q_gpd}} only for fast methods? 
+\item{speed}{Compute \code{\link{q_gpd}} only for fast methods?
 Currently, only the Bayesian method is excluded. DEFAULT: TRUE}
 
-\item{quiet}{Suppress notes? If it is actually set to FALSE (not missing), 
+\item{quiet}{Suppress notes? If it is actually set to FALSE (not missing),
 gpquiet is set to FALSE to print all the warnings including stacks.
 DEFAULT: FALSE}
 
@@ -78,7 +87,7 @@ DEFAULT: FALSE}
 \item{gpquiet}{Suppress warnings in \code{\link{q_gpd}}?
 DEFAULT: TRUE if quiet is not specified, else quiet}
 
-\item{\dots}{Arguments passed to \code{\link{distLfit}} 
+\item{\dots}{Arguments passed to \code{\link{distLfit}}
 and \code{\link{distLweights}} like weightc, ks=TRUE}
 }
 \value{
@@ -119,7 +128,7 @@ dlq$quant
 plotLquantile(dlq) # per default best fitting distribution functions
 plotLquantile(dlq, row=c("wak","GPD*"), nbest=14)
 #pdf("dummy.pdf", width=9)
-plotLquantile(dlq, row="GPD*", nbest=13, xlim=c(102,110), 
+plotLquantile(dlq, row="GPD*", nbest=13, xlim=c(102,110),
           linargs=list(lwd=3), heights=seq(0.02, 0.005, len=14))
 #dev.off()
 
@@ -147,7 +156,7 @@ qwak <- distLquantile(annMax, sel="wak", prob=0.95, emp=FALSE, list=TRUE)
 plotLquantile(qwak, ylim=c(0,0.06) ); qwak$quant
 qwak2 <-distLquantile(annMax, sel="wak", prob=0.95, emp=FALSE, list=TRUE, truncate=0.6)
 plotLquantile(qwak2, add=TRUE, distcols="blue")
-                     
+
 
 # Simulation of truncation effect
 library(lmomco)
@@ -170,7 +179,7 @@ par(mar=c(3,4.5,3,0.5))
 plot(mytrunc, trunceffect[1,], ylim=range(trunceffect), las=1, type="l",
      main=c("High quantiles of 1000 random numbers from gev distribution",
            "Estimation based on proportion of lower values truncated"),
-     xlab="", ylab="parametrical quantile")
+     xlab="", ylab="parametric quantile")
 title(xlab="Proportion censored", mgp=c(1.8,1,0))
 for(i in 2:4) lines(mytrunc, trunceffect[i,])
 library("berryFunctions")
@@ -178,8 +187,9 @@ textField(rep(0.5,4), trunceffect[,11], paste0("Q",myprobs*100,"\%") )
 par(op)
 
 trunc <- seq(0,0.1,len=200)
-dd <- pbsapply(trunc, function(t) distLquantile(annMax, 
+dd <- pbsapply(trunc, function(t) distLquantile(annMax,
           selection="gpa", weight=FALSE, truncate=t, prob=0.99, quiet=T)[c(1,3),])
+ plot(trunc, dd[1,], type="o", las=1)
 lines(trunc, dd[2,], type="o", col=2)
 
 
@@ -201,19 +211,18 @@ q_gpd(rnum, probs=myprobs, truncate=0.5)
 } # end dontrun
 
 }
-\author{
-Berry Boessenkool, \email{berry-b@gmx.de}, March + July 2015, Feb 2016
-}
 \references{
 On GPD: \url{http://stats.stackexchange.com/questions/69438}
 }
 \seealso{
 \code{\link{q_gpd}}, \code{\link{distLfit}}, require("truncdist")
-        Xian Zhou, Liuquan Sun and Haobo Ren (2000): Quantile estimation for 
+        Xian Zhou, Liuquan Sun and Haobo Ren (2000): Quantile estimation for
         left truncated and right censored data, Statistica Sinica 10
          \url{http://www3.stat.sinica.edu.tw/statistica/oldpdf/A10n411.pdf}\cr
+}
+\author{
+Berry Boessenkool, \email{berry-b@gmx.de}, March + July 2015, Feb 2016
 }
 \keyword{distribution}
 \keyword{robust}
 \keyword{univar}
-

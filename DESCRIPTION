@@ -1,10 +1,10 @@
 Package: extremeStat
 Type: Package
 Title: Extreme Value Statistics and Quantile Estimation
-Version: 1.3.0
-Date: 2017-01-26
+Version: 1.4.0
+Date: 2017-11-03
 Depends: R (>= 2.10)
-Imports: lmomco (>= 2.2.5), berryFunctions (>= 1.13.9), pbapply,
+Imports: lmomco (>= 2.2.5), berryFunctions (>= 1.15.6), pbapply,
         RColorBrewer, grDevices, graphics, methods, stats, utils, evir,
         ismev, fExtremes, extRemes, evd, Renext
 Author: Berry Boessenkool
@@ -14,10 +14,11 @@ Description: Code to fit, plot and compare several (extreme value)
     draw a plot with return periods on a linear scale.
 License: GPL (>= 2)
 URL: https://github.com/brry/extremeStat
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1.9000
 Suggests: testthat, knitr, rmarkdown
 VignetteBuilder: knitr
+BugReports: https://github.com/brry/extremeStat
 NeedsCompilation: no
-Packaged: 2017-01-26 15:35:11 UTC; boessenkool
+Packaged: 2017-11-04 13:45:09 UTC; berry
 Repository: CRAN
-Date/Publication: 2017-01-27 10:18:14
+Date/Publication: 2017-11-05 16:30:55 UTC

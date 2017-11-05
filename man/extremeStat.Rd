@@ -9,7 +9,7 @@
 Fit (via L moments), plot (on a linear scale) and compare (by goodness of fit)
 several (extreme value) distributions.
 Compute high quantiles even in small samples and estimate extrema at given return periods.\cr
-Open the \href{https://cran.r-project.org/package=extremeStat/vignettes/extremeStat.html}{Vignette} 
+Open the \href{https://cran.r-project.org/package=extremeStat/vignettes/extremeStat.html}{Vignette}
 for an introduction to the package: \code{vignette("extremeStat")}\cr
 This package heavily relies on and thankfully acknowledges the package \code{lmomco} by WH Asquith.
 }
@@ -26,15 +26,13 @@ The main functions in the extremeStat package are:
 }
 They create and modify a list object printed by (and documented in) \code{\link{printL}}.
 }
+
 \examples{
 data(annMax) # annual discharge maxima from a stream in Austria
 plot(annMax, type="l")
 dle <- distLextreme(annMax)
 dle$returnlev
 
-}
-\author{
-Berry Boessenkool, \email{berry-b@gmx.de}, 2014-2016
 }
 \seealso{
 If you are looking for more detailed (uncertainty) analysis, eg confidence intervals,
@@ -46,6 +44,8 @@ Distributions: \url{https://www.rmetrics.org/files/Meielisalp2009/Presentations/
 and: \url{https://cran.r-project.org/view=Distributions} \cr
 R in Hydrology: \url{http://abouthydrology.blogspot.de/2012/08/r-resources-for-hydrologists.html}\cr
 }
+\author{
+Berry Boessenkool, \email{berry-b@gmx.de}, 2014-2016
+}
 \keyword{documentation}
 \keyword{package}
-
