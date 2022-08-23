@@ -4,13 +4,15 @@
 \name{weightp}
 \alias{weightp}
 \title{distribution weights}
-\format{named num [1:17]}
+\format{
+named num [1:17]
+}
 \source{
 See paper revisions (not yet online at moment of extremeStat update) (\email{berry-b@gmx.de})
 }
 \description{
 Weights for weighted average as in the submission of revisions for the paper
-\url{http://www.nat-hazards-earth-syst-sci-discuss.net/nhess-2016-183/}
+\url{https://nhess.copernicus.org/articles/17/1623/2017/nhess-17-1623-2017-discussion.html}
 }
 \examples{
 

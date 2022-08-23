@@ -4,11 +4,20 @@
 \alias{q_gpd}
 \title{GPD quantile of sample}
 \usage{
-q_gpd(x, probs = c(0.8, 0.9, 0.99), truncate = 0,
+q_gpd(
+  x,
+  probs = c(0.8, 0.9, 0.99),
+  truncate = 0,
   threshold = berryFunctions::quantileMean(x, truncate),
-  package = "extRemes", method = NULL, list = FALSE,
-  undertruncNA = TRUE, quiet = FALSE, ttquiet = quiet, efquiet = quiet,
-  ...)
+  package = "extRemes",
+  method = NULL,
+  list = FALSE,
+  undertruncNA = TRUE,
+  quiet = FALSE,
+  ttquiet = quiet,
+  efquiet = quiet,
+  ...
+)
 }
 \arguments{
 \item{x}{Vector with numeric values. NAs are silently ignored.}
@@ -207,8 +216,8 @@ text(300, 300, "empirical quantile estimate", col="green3")
 
 }
 \references{
-\url{http://stackoverflow.com/q/27524131},
-            \url{http://stats.stackexchange.com/q/129438}
+\url{https://stackoverflow.com/q/27524131},
+            \url{https://stats.stackexchange.com/q/129438}
 }
 \seealso{
 \code{\link{distLquantile}} which compares results for all packages\cr

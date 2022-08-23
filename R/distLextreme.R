@@ -33,7 +33,7 @@
 #' @seealso \code{\link{distLfit}}. \code{\link{distLexBoot}} for confidence
 #'          interval from Bootstrapping.
 #'          \code{\link[extRemes]{fevd}} in the package \code{extRemes}.
-#' @references \url{http://RclickHandbuch.wordpress.com} Chapter 15 (German)\cr
+#' @references \url{https://RclickHandbuch.wordpress.com} Chapter 15 (German)\cr
 #'             Christoph Mudersbach: Untersuchungen zur Ermittlung von hydrologischen
 #'             Bemessungsgroessen mit Verfahren der instationaeren Extremwertstatistik
 #' @keywords hplot dplot distribution ts
@@ -57,6 +57,8 @@
 #' # Basic examples ---------------------------------------------------------------
 #' dlf <- distLextreme(annMax)
 #' plotLextreme(dlf, log=TRUE)
+#' plotLextreme(dlf, log="xy")
+#' plotLextreme(dlf)
 #' 
 #' # Object structure:
 #' str(dlf, max.lev=2)
@@ -167,7 +169,7 @@
 #' 
 #' # Minima -----------------------------------------------------------------------
 #' 
-#' browseURL("http://nrfa.ceh.ac.uk/data/station/meanflow/39072")
+#' browseURL("https://nrfa.ceh.ac.uk/data/station/meanflow/39072")
 #' qfile <- system.file("extdata/discharge39072.csv", package="berryFunctions")
 #' Q <- read.table(qfile, skip=19, header=TRUE, sep=",", fill=TRUE)[,1:2]
 #' rm(qfile)

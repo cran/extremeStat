@@ -1,10 +1,12 @@
 
 extremeStat ToDo-list / wishlist / issues
+- CRAN computation time of examples reduced (YET TO DO!!)
 - read all of https://www.ine.pt/revstat/pdf/rs120102.pdf and coles (2001)
 - distLextreme, distLquantile, q_gpd: reduce example section, potentially move some to tests. add Nile, rain, danish
 - split up q_gpd into f_gpd, p/q/d/r_gpd and comp_gpd
 - distLexBoot (+plot) conf.lev vectorization
 - distLquantile and g_gpd: reference to vignette POT
+- replace berryFunctions::rainbow2 with catPal/seqPal
 
 
 ---------------------------------------
@@ -12,7 +14,24 @@ extremeStat Package by Berry Boessenkool, berry-b@gmx.de
 Any feedback is welcome, per email or on github.com/brry/extremeStat
 ---------------------------------------
 
-Version 1.4.0 (2017-11-02)
+---------------------------------------
+---------------------------------------
+
+
+Changes in version 1.5.0 (2022-08-22)
+- example exectution time reduced in CRAN tests 
+- plotLexBoot: can now handle selection input correctly 
+- documentation improved here and there
+- plotLextreme: new argument "logargs" 
+- plotLextreme: argument log can now be "xy" for both axes on logarithmic scale
+- distLexBoot: gains argument 'replace'
+- new distributions in lmomco reflected 
+
+---------------------------------------
+---------------------------------------
+
+
+Changes in version 1.4.0 (2017-11-02)
 - printL improved
 - distLexBoot now uses npy
 - distLextreme can now use truncate
@@ -23,7 +42,7 @@ Version 1.4.0 (2017-11-02)
 ---------------------------------------
 
 
-Version 1.3.0 (2017-01-26)
+Changes in version 1.3.0 (2017-01-26)
 Package thoroughly cleaned up and restructured:
 - plot functions renamed to common syntax plotL***
 - distLgof integrated into distLfit, but weight part moved into distLweights
@@ -42,23 +61,20 @@ Package thoroughly cleaned up and restructured:
 - extensive use of berryFunctions::tryStack to trace errors and warnings
 - several arguments removed and some renamed
 - documentation more standardized, vignette expanded
-
-For all changes, see
-https://github.com/brry/extremeStat/compare/master@{2016-12-13}...master@{2017-01-26}#files_bucket
-
-new functions: distLweights, q_weighted, plotLquantile
-removed: distLgof
-renamed: distLprint -> printL, 
-         distLextremePlot -> plotLextreme, 
-         distLgofPlot -> plotLweights, 
-         distLplot -> plotLfit
+- For all changes, see https://github.com/brry/extremeStat/compare/master@{2016-12-13}...master@{2017-01-26}#files_bucket
+- new functions: distLweights, q_weighted, plotLquantile
+- removed: distLgof
+- renamed: distLprint -> printL, 
+-          distLextremePlot -> plotLextreme, 
+-          distLgofPlot -> plotLweights, 
+-          distLplot -> plotLfit
 
 
 ---------------------------------------
 ---------------------------------------
 
 
-Version 0.6.0 (2016-12-12)
+Changes in version 0.6.0 (2016-12-12)
 For complete log, see https://github.com/brry/extremeStat/commits/master
 - several lmomco changes reflected
 - several rare errors (especially with very small sample sizes) captured
@@ -74,11 +90,10 @@ For complete log, see https://github.com/brry/extremeStat/commits/master
 ---------------------------------------
 
 
-Version 0.5.15 (2016-05-11)
-submitted to CRAN
-various changes, see github commit log at
-https://github.com/brry/extremeStat/commits/master
-highlights:
+Changes in version 0.5.15 (2016-05-11)
+- submitted to CRAN
+- various changes, see github commit log at https://github.com/brry/extremeStat/commits/master
+- highlights:
 - package has a vignette and is Roxygenized
 - quantile estimation now possible, function tested and expanded thoroughly
 - POT method (truncation parameter) introduced
@@ -90,16 +105,15 @@ highlights:
 - distLgof now returns weights calculated by 3 different methods
 - distLplot now uses supdist, package depends on lmomco >=2.1.3 (version that includes supdist)
 - installB: moved to https://github.com/brry/installB to remove devtools dependency here
-
-new functions: distLextremePlot, distLprint, distLquantile, q_gpd
-renamed distLgofPlot for consistency in lowerCamel-derived case usage.
+- new functions: distLextremePlot, distLprint, distLquantile, q_gpd
+- renamed distLgofPlot for consistency in lowerCamel-derived case usage.
 
 
 ---------------------------------------
 ---------------------------------------
 
 
-Version 0.4 (2014-12-04)
+Changes in version 0.4 (2014-12-04)
 depends on berryFunctions again (maintaning functions twice is nonsense)
 - distLgof now has ks and quiet argument
 - distLplot now has las and ylab arguments
@@ -110,21 +124,20 @@ depends on berryFunctions again (maintaning functions twice is nonsense)
 ---------------------------------------
 
 
-Version 0.3 (2014-09-30)
-independent from berryFunctions now.
-Thus I included lim0, logAxis, logVals, owa, rainbow2, rmse, rsquare
+Changes in version 0.3 (2014-09-30)
+- independent from berryFunctions now.
+- Thus I included lim0, logAxis, logVals, owa, rainbow2, rmse, rsquare
 
 
 ---------------------------------------
 ---------------------------------------
 
 
-Version 0.2 (2014-09-22)
-First version submitted to CRAN, was not accepted.
-Documentation slightly refined here and there
-changed all "cat" to "message"
-added datname element in dlf, used for main and xlab in all suitable plots
-
+Changes in version 0.2 (2014-09-22)
+- First version submitted to CRAN, was not accepted.
+- Documentation slightly refined here and there
+- changed all "cat" to "message"
+- added datname element in dlf, used for main and xlab in all suitable plots
 - distLplot:
 # log=TRUE now works properly, as it just draws logAxis
 # logargs argument added
@@ -133,13 +146,10 @@ added datname element in dlf, used for main and xlab in all suitable plots
 # new default for color vector
 # density plot now with lim0
 # if(percentline), a vartical dashed line at gofProp is drawn
-
 - distLgof:
 # plot default is now TRUE
-
 - distLfit
 #distLgof is now explicitly called with plot=FALSE
-
 - distLgofplot:
 # received a bunch of graphic arguments
 # 'order' and 'add' arguments added
@@ -149,10 +159,10 @@ added datname element in dlf, used for main and xlab in all suitable plots
 ---------------------------------------
 
 
-Version 0.1 (2014-09-15)
-Initial build with the functions:
-distLextreme (replacing berryFunctions::extremeStatLmom)
-distLfit
-distLplot
-distLgof
-distLgofplot
+Changes in version 0.1 (2014-09-15)
+- Initial build with the functions:
+- distLextreme (replacing berryFunctions::extremeStatLmom)
+- distLfit
+- distLplot
+- distLgof
+- distLgofplot

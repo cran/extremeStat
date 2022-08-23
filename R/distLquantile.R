@@ -17,8 +17,8 @@
 #' @seealso \code{\link{q_gpd}}, \code{\link{distLfit}}, require("truncdist")
 #'         Xian Zhou, Liuquan Sun and Haobo Ren (2000): Quantile estimation for
 #'         left truncated and right censored data, Statistica Sinica 10
-#'          \url{http://www3.stat.sinica.edu.tw/statistica/oldpdf/A10n411.pdf}\cr
-#' @references On GPD: \url{http://stats.stackexchange.com/questions/69438}
+#'          \url{https://www3.stat.sinica.edu.tw/statistica/oldpdf/A10n411.pdf}\cr
+#' @references On GPD: \url{https://stats.stackexchange.com/questions/69438}
 #' @keywords distribution robust univar
 #' @export
 #' @importFrom berryFunctions quantileMean owa tryStack rainbow2
@@ -30,6 +30,9 @@
 #' data(annMax) # Annual Discharge Maxima (streamflow)
 #' 
 #' distLquantile(annMax, emp=FALSE)[,] # several distribution functions in lmomco
+#' 
+#' \dontrun{
+#' ## Taken out from CRAN package check because it's slow
 #' distLquantile(annMax, truncate=0.8, probs=0.95)[,] # POT (annMax already block maxima)
 #' dlf <- distLquantile(annMax, probs=0.95, list=TRUE)
 #' plotLquantile(dlf, linargs=list(lwd=3), nbest=5, breaks=10)
@@ -49,9 +52,6 @@
 #'           linargs=list(lwd=3), heights=seq(0.02, 0.005, len=14))
 #' #dev.off()
 #' 
-#' 
-#' \dontrun{
-#' ## Taken out from CRAN package check because it's slow
 #' 
 #' # Sanity checks: important for very small samples:
 #' x1 <- c(2.6, 2.5, 2.9, 3, 5, 2.7, 2.7, 5.7, 2.8, 3.1, 3.6, 2.6, 5.8, 5.6, 5.7, 5.3)

@@ -18,9 +18,11 @@
 #' @examples
 #' 
 #' data(annMax)
-#' dlf <- distLextreme(annMax, selection=c("wak","gum","gev","nor"))
+#' dlf <- distLextreme(annMax, selection=c("gum","gev","wak","nor"))
 #' dlfB <- distLexBoot(dlf, nbest=4, conf.lev=0.5, n=10) # n low for quick example tests
 #' plotLexBoot(dlfB)
+#' plotLexBoot(dlfB, selection=c("nor","gev"))
+#' plotLexBoot(dlfB, selection=c("gum","gev","wak","nor"), order=FALSE)
 #' 
 #' @param dlf       \code{dlf} object, as returned by \code{\link{distLextreme}}
 #' @param nbest     Number of best fitted distribution functions in dlf for which
@@ -33,6 +35,7 @@
 #' @param conf.lev  Confidence level (Proportion of subsamples within 'confidence interval').
 #'                  Quantiles extracted from this value are passed to
 #'                  \code{\link[berryFunctions]{quantileMean}}. DEFAULT: 0.95
+#' @param replace   Logical: replace in each \code{\link[base]{sample}}? DEFAULT: FALSE
 #' @param RPs       Return Period vector, by default calculated internally based on
 #'                  value of \code{log}. DEFAULT: NULL
 #' @param log       RPs suitable for plot on a logarithmic axis? DEFAULT: TRUE
@@ -47,6 +50,7 @@ selection=NULL,
 n=100,
 prop=0.8,
 conf.lev=0.95,
+replace=FALSE,
 RPs=NULL,
 log=TRUE,
 progbars=TRUE,
@@ -64,7 +68,7 @@ sss <- round(length(dlf$dat_full)*prop)
 # Actual computation for each subsample
 if(progbars) replicate <- pbapply::pbreplicate
 simQ_orig <- replicate(n=n,
-   distLquantile(x=c(sample(dlf$dat_full,size=sss)), selection=selection, order=FALSE,
+   distLquantile(x=c(sample(dlf$dat_full,size=sss, replace=replace)), selection=selection, order=FALSE,
    probs=1-1/(RPs*dlf$npy), empirical=FALSE, progbars=FALSE, time=FALSE, quiet=quiet,
    truncate=dlf$truncate),
    simplify=FALSE)

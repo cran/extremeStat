@@ -4,11 +4,20 @@
 \alias{distLfit}
 \title{Fit distributions via L-moments}
 \usage{
-distLfit(dat, datname = deparse(substitute(dat)), selection = NULL,
-  speed = TRUE, ks = FALSE, truncate = 0,
+distLfit(
+  dat,
+  datname = deparse(substitute(dat)),
+  selection = NULL,
+  speed = TRUE,
+  ks = FALSE,
+  truncate = 0,
   threshold = berryFunctions::quantileMean(dat, truncate),
-  progbars = length(dat) > 200, time = TRUE, quiet = FALSE,
-  ssquiet = quiet, ...)
+  progbars = length(dat) > 200,
+  time = TRUE,
+  quiet = FALSE,
+  ssquiet = quiet,
+  ...
+)
 }
 \arguments{
 \item{dat}{Vector with values}
@@ -120,7 +129,7 @@ d_all$gof
     More complex estimates of quality of fits:
     Fard, M.N.P. and Holmquist, B. (2013, Chilean Journal of Statistics):
     Powerful goodness-of-fit tests for the extreme value distribution.
-    http://chjs.mat.utfsm.cl/volumes/04/01/Fard_Holmquist(2013).pdf
+    https://chjs.mat.utfsm.cl/volumes/04/01/Fard_Holmquist(2013).pdf
 }
 \author{
 Berry Boessenkool, \email{berry-b@gmx.de}, Sept 2014, July 2015, Dec 2016

@@ -4,14 +4,33 @@
 \alias{plotLfit}
 \title{Plot distributions fitted with L-moments}
 \usage{
-plotLfit(dlf, nbest = 5, selection = NULL, order = TRUE, rmse = 4,
-  cdf = FALSE, log = FALSE, supportends = TRUE, breaks = 20,
-  xlim = extendrange(dlf$dat, f = 0.15), ylim = NULL, col = "grey",
+plotLfit(
+  dlf,
+  nbest = 5,
+  selection = NULL,
+  order = TRUE,
+  rmse = 4,
+  cdf = FALSE,
+  log = FALSE,
+  supportends = TRUE,
+  breaks = 20,
+  xlim = extendrange(dlf$dat, f = 0.15),
+  ylim = NULL,
+  col = "grey",
   main = paste(if (cdf) "Cumulated", "density distributions of", dlf$datname),
-  xlab = dlf$datname, ylab = if (cdf) "(Empirical) Cumulated Density (CDF)"
-  else "Probability Density Function (PDF)", las = 1,
-  distcols = berryFunctions::rainbow2(nbest), lty = 1, add = FALSE,
-  logargs = NULL, legend = TRUE, legargs = NULL, histargs = NULL, ...)
+  xlab = dlf$datname,
+  ylab = if (cdf) "(Empirical) Cumulated Density (CDF)" else
+    "Probability Density Function (PDF)",
+  las = 1,
+  distcols = berryFunctions::rainbow2(nbest),
+  lty = 1,
+  add = FALSE,
+  logargs = NULL,
+  legend = TRUE,
+  legargs = NULL,
+  histargs = NULL,
+  ...
+)
 }
 \arguments{
 \item{dlf}{List as returned by \code{\link{distLfit}}, containing the
@@ -81,7 +100,7 @@ Plot histogram and distribution densities \emph{or} ecdf with cumulated probabil
 \details{
 By default, this plots density instead of CDF, because the distributions are
 easier to discern and tail behavior is easier to judge visually. See also
-\url{http://www.vosesoftware.com/ModelRiskHelp/index.htm#Presenting_results/Cumulative_plots/Relationship_between_cdf_and_density_(histogram)_plots.htm}
+\url{https://www.vosesoftware.com/ModelRiskHelp/index.htm#Presenting_results/Cumulative_plots/Relationship_between_cdf_and_density_(histogram)_plots.htm}
 }
 \examples{
  # See distLfit

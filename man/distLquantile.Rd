@@ -4,13 +4,29 @@
 \alias{distLquantile}
 \title{distribution quantiles}
 \usage{
-distLquantile(x = NULL, probs = c(0.8, 0.9, 0.99), truncate = 0,
+distLquantile(
+  x = NULL,
+  probs = c(0.8, 0.9, 0.99),
+  truncate = 0,
   threshold = quantileMean(dlf$dat_full[is.finite(dlf$dat_full)], truncate),
-  sanerange = NA, sanevals = NA, selection = NULL, order = TRUE,
-  dlf = NULL, datname = deparse(substitute(x)), list = FALSE,
-  empirical = TRUE, qemp.type = 8, weighted = empirical,
-  gpd = empirical, speed = TRUE, quiet = FALSE, ssquiet = quiet,
-  ttquiet = quiet, gpquiet = missing(quiet) | quiet, ...)
+  sanerange = NA,
+  sanevals = NA,
+  selection = NULL,
+  order = TRUE,
+  dlf = NULL,
+  datname = deparse(substitute(x)),
+  list = FALSE,
+  empirical = TRUE,
+  qemp.type = 8,
+  weighted = empirical,
+  gpd = empirical,
+  speed = TRUE,
+  quiet = FALSE,
+  ssquiet = quiet,
+  ttquiet = quiet,
+  gpquiet = missing(quiet) | quiet,
+  ...
+)
 }
 \arguments{
 \item{x}{Sample for which parametric quantiles are to be calculated.
@@ -113,6 +129,9 @@ NAs are always removed from x in \code{\link{distLfit}}
 data(annMax) # Annual Discharge Maxima (streamflow)
 
 distLquantile(annMax, emp=FALSE)[,] # several distribution functions in lmomco
+
+\dontrun{
+## Taken out from CRAN package check because it's slow
 distLquantile(annMax, truncate=0.8, probs=0.95)[,] # POT (annMax already block maxima)
 dlf <- distLquantile(annMax, probs=0.95, list=TRUE)
 plotLquantile(dlf, linargs=list(lwd=3), nbest=5, breaks=10)
@@ -132,9 +151,6 @@ plotLquantile(dlq, row="GPD*", nbest=13, xlim=c(102,110),
           linargs=list(lwd=3), heights=seq(0.02, 0.005, len=14))
 #dev.off()
 
-
-\dontrun{
-## Taken out from CRAN package check because it's slow
 
 # Sanity checks: important for very small samples:
 x1 <- c(2.6, 2.5, 2.9, 3, 5, 2.7, 2.7, 5.7, 2.8, 3.1, 3.6, 2.6, 5.8, 5.6, 5.7, 5.3)
@@ -212,13 +228,13 @@ q_gpd(rnum, probs=myprobs, truncate=0.5)
 
 }
 \references{
-On GPD: \url{http://stats.stackexchange.com/questions/69438}
+On GPD: \url{https://stats.stackexchange.com/questions/69438}
 }
 \seealso{
 \code{\link{q_gpd}}, \code{\link{distLfit}}, require("truncdist")
         Xian Zhou, Liuquan Sun and Haobo Ren (2000): Quantile estimation for
         left truncated and right censored data, Statistica Sinica 10
-         \url{http://www3.stat.sinica.edu.tw/statistica/oldpdf/A10n411.pdf}\cr
+         \url{https://www3.stat.sinica.edu.tw/statistica/oldpdf/A10n411.pdf}\cr
 }
 \author{
 Berry Boessenkool, \email{berry-b@gmx.de}, March + July 2015, Feb 2016
