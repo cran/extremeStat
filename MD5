@@ -1,4 +1,4 @@
-26145eda8abd4a02f537969fdf93c7e6 *DESCRIPTION
+8d016d282638778fd12c2051c3b38800 *DESCRIPTION
 51032d187b217475c391c8c9a8fd08e9 *NAMESPACE
 7d389accd886bc0bcb6e8288ba910914 *NEWS
 6fe73f4e4a4b7f72ae578b38031ef02e *R/distLexBoot.R
@@ -22,7 +22,7 @@ d959c26481e6b7d6522ebd24741746cc *README.md
 7f1e8f2417e3ab2be48f92338aa89c56 *data/weightp.rda
 9abd6670dfe923a2e19b625c48b3be22 *inst/doc/extremeStat.R
 1654c6a69c9e12ac0508b891efb28a14 *inst/doc/extremeStat.Rmd
-cae6b3d12678218e8653f31508bbb3e9 *inst/doc/extremeStat.html
+a71f96489b3893c2c95824647dd9f9b9 *inst/doc/extremeStat.html
 1ce900393cbf2945a7d4566b083fe547 *man/annMax.Rd
 3b144c998c3921bdf1471d6b40e00228 *man/distLexBoot.Rd
 0aea35261c4fd3c73e286eba83a18fa0 *man/distLextreme.Rd
@@ -43,7 +43,7 @@ cd99108f1d738f6a5dc063a4cd844180 *man/printL.Rd
 0fba3ca6b4440c6227dfdb358676f62a *tests/testthat.R
 7cf867c2515a49fba70a949b3428f83a *tests/testthat/test-fit.R
 f1c9b0b2cae633e1af866c06591b50ed *tests/testthat/test-gof.R
-ab2876e10b5c5b80570b0619cd7a3d5a *tests/testthat/test-quantile.R
+8cd71181aa6bc57a37b4ed136a277c23 *tests/testthat/test-quantile.R
 1654c6a69c9e12ac0508b891efb28a14 *vignettes/extremeStat.Rmd
 4720bb3ba722181227e6e03ff82556de *vignettes/qq.Rdata
 c4efd1a6798602fc0bd4d3096da319d8 *vignettes/sq.Rdata

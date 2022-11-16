@@ -1,8 +1,8 @@
 Package: extremeStat
 Type: Package
 Title: Extreme Value Statistics and Quantile Estimation
-Version: 1.5.2
-Date: 2022-08-23
+Version: 1.5.3
+Date: 2022-11-16
 Depends: R (>= 2.10)
 Imports: lmomco (>= 2.2.5), berryFunctions (>= 1.15.6), pbapply,
         RColorBrewer, grDevices, graphics, methods, stats, utils, evir,
@@ -20,6 +20,6 @@ Suggests: testthat, knitr, rmarkdown
 VignetteBuilder: knitr
 BugReports: https://github.com/brry/extremeStat
 NeedsCompilation: no
-Packaged: 2022-08-23 07:56:38 UTC; berry
+Packaged: 2022-11-16 10:14:26 UTC; berry
 Repository: CRAN
-Date/Publication: 2022-08-23 10:30:02 UTC
+Date/Publication: 2022-11-16 14:30:04 UTC
