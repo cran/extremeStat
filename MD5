@@ -1,4 +1,4 @@
-8d016d282638778fd12c2051c3b38800 *DESCRIPTION
+a6e16cd849e8d7c18abbbd6d7a6d36e3 *DESCRIPTION
 51032d187b217475c391c8c9a8fd08e9 *NAMESPACE
 7d389accd886bc0bcb6e8288ba910914 *NEWS
 6fe73f4e4a4b7f72ae578b38031ef02e *R/distLexBoot.R
@@ -17,12 +17,12 @@ c38637c6d5f9eb860416aceb73d51667 *R/q_gpd.R
 edee2f84b14b33c2935433fa03eae351 *R/q_weighted.R
 b4c1d3d8a4aa786b056f3812500c6f4d *R/quantGPD.R
 d959c26481e6b7d6522ebd24741746cc *README.md
-56da89326a9cbb64d00f5406e9f5f337 *build/vignette.rds
+5d3d9f3df3509739d88174d1bcf54649 *build/vignette.rds
 2d3320b307ee365390b16dca9f6f3eef *data/annMax.rda
 7f1e8f2417e3ab2be48f92338aa89c56 *data/weightp.rda
-9abd6670dfe923a2e19b625c48b3be22 *inst/doc/extremeStat.R
-1654c6a69c9e12ac0508b891efb28a14 *inst/doc/extremeStat.Rmd
-a71f96489b3893c2c95824647dd9f9b9 *inst/doc/extremeStat.html
+0386fb9c0274d5da99d59a8a394210ef *inst/doc/extremeStat.R
+656c52b9b80cc9a065218a84f2049d23 *inst/doc/extremeStat.Rmd
+49572f46daaf48cf3752eff2890d8337 *inst/doc/extremeStat.html
 1ce900393cbf2945a7d4566b083fe547 *man/annMax.Rd
 3b144c998c3921bdf1471d6b40e00228 *man/distLexBoot.Rd
 0aea35261c4fd3c73e286eba83a18fa0 *man/distLextreme.Rd
@@ -43,7 +43,7 @@ cd99108f1d738f6a5dc063a4cd844180 *man/printL.Rd
 0fba3ca6b4440c6227dfdb358676f62a *tests/testthat.R
 7cf867c2515a49fba70a949b3428f83a *tests/testthat/test-fit.R
 f1c9b0b2cae633e1af866c06591b50ed *tests/testthat/test-gof.R
-8cd71181aa6bc57a37b4ed136a277c23 *tests/testthat/test-quantile.R
-1654c6a69c9e12ac0508b891efb28a14 *vignettes/extremeStat.Rmd
+8786a56ea3b6fe9fd47b3d104ac1c71a *tests/testthat/test-quantile.R
+656c52b9b80cc9a065218a84f2049d23 *vignettes/extremeStat.Rmd
 4720bb3ba722181227e6e03ff82556de *vignettes/qq.Rdata
 c4efd1a6798602fc0bd4d3096da319d8 *vignettes/sq.Rdata
