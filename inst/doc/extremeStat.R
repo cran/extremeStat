@@ -7,11 +7,11 @@ plotLextreme(extremes, log="x", xlim=c(1,200), ylim=c(35,140), nbest=7)
 head(extremes$returnlev)
 
 ## ----instcran, eval=FALSE-----------------------------------------------------
-#  install.packages("extremeStat")
-#  
-#  # install the development version on github, incl. vignette:
-#  if(!requireNamespace("remotes", quitly=TRUE)) install.packages("remotes")
-#  remotes::install_github("brry/extremeStat", build_vignettes=TRUE)
+# install.packages("extremeStat")
+# 
+# # install the development version on github, incl. vignette:
+# if(!requireNamespace("remotes", quitly=TRUE)) install.packages("remotes")
+# remotes::install_github("brry/extremeStat", build_vignettes=TRUE)
 
 ## ----library, echo=TRUE-------------------------------------------------------
 library(extremeStat)
@@ -109,15 +109,15 @@ axis(1, at=0:5*0.2, labels=c("0",1:4*0.2,"1"))
 for(d in dn) lines(tt, sapply(qq, "[", d, j="RMSE"), col=dlf00$distcols[d])
 
 ## ----ssdep, eval=FALSE--------------------------------------------------------
-#  canload <- suppressWarnings(try(load("sq.Rdata"), silent = TRUE))
-#  if(inherits(canload, "try-error")) {
-#  set.seed(1)
-#  ss <- c(30,50,70,100,200,300,400,500,1000)
-#  rainsamplequantile <- function() sapply(ss, function(s) distLquantile(sample(rain,s),
-#            probs=0.999, plot=F, truncate=0.8, quiet=T, sel="wak", gpd=F, weight=F))
-#  sq <- pbapply::pbreplicate(n=100, rainsamplequantile())
-#  save(ss,sq, file="sq.Rdata")
-#  }
+# canload <- suppressWarnings(try(load("sq.Rdata"), silent = TRUE))
+# if(inherits(canload, "try-error")) {
+# set.seed(1)
+# ss <- c(30,50,70,100,200,300,400,500,1000)
+# rainsamplequantile <- function() sapply(ss, function(s) distLquantile(sample(rain,s),
+#           probs=0.999, plot=F, truncate=0.8, quiet=T, sel="wak", gpd=F, weight=F))
+# sq <- pbapply::pbreplicate(n=100, rainsamplequantile())
+# save(ss,sq, file="sq.Rdata")
+# }
 
 ## ----ssdepplot, fig.height=3.5, fig.width=5.5---------------------------------
 load("sq.Rdata")
@@ -141,5 +141,5 @@ dlf$returnlev[1:20,]
 
 
 ## ----help, eval=FALSE---------------------------------------------------------
-#  ?extremeStat
+# ?extremeStat
 
